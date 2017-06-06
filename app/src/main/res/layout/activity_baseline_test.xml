@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient"
+    android:paddingBottom="5dp"
+    android:paddingTop="15dp"
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp"
+    tools:context="com.example.accer.aphasia_app.training"
+    android:keepScreenOn="true"
+    >
+
+
+    <RelativeLayout
+        android:id="@+id/relative_image"
+        android:layout_width="301dp"
+        android:layout_height="156dp"
+        android:layout_marginLeft="23dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rounded_buttons"
+        android:padding="5dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        android:elevation="10dp">
+
+          <ImageView
+            android:id="@+id/img_training"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            tools:layout_editor_absoluteX="97dp"
+             />
+
+        <Button
+            android:id="@+id/btn_timer"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/timer"
+            android:clickable="false"
+            android:text="5"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_check"
+        android:layout_width="150dp"
+        android:layout_height="280dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:ignore="MissingConstraints"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintLeft_toRightOf="@+id/relative_image"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintHorizontal_bias="0.431"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp">
+
+       <ImageButton
+        android:id="@+id/btn_untick"
+        android:padding="5dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:src="@drawable/untick"
+        android:background="@drawable/btnback"
+
+           android:layout_alignParentBottom="true"
+           android:layout_centerHorizontal="true" />
+
+    <ImageButton
+        android:id="@+id/btn_tick"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:src="@drawable/tick"
+        android:background="@drawable/btnback"
+        android:layout_alignParentTop="true"
+        android:layout_alignLeft="@+id/btn_untick"
+        android:layout_alignStart="@+id/btn_untick" />
+
+    </RelativeLayout>
+
+
+</android.support.constraint.ConstraintLayout>
