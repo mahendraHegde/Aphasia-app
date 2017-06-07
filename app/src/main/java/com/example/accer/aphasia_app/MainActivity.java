@@ -38,14 +38,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         db=new ADB(this);
         c=Calendar.getInstance();
+        meta=new Meta(this);
         if(db.getDataRowCount()<=0) {
-            Toast.makeText(getApplicationContext(),db.getDataRowCount()+"",Toast.LENGTH_SHORT).show();
+           meta.deleteBackup();
             for (int i = 1; i <= totalNoOfPics; i++) {
                 db.addData("train_" + i);
             }
         }
-      //  backup();
-        meta=new Meta(this);
+        backup();
+
        // meta.deleteBackup();
 
 

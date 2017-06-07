@@ -30,6 +30,7 @@ import java.util.Calendar;
 
 public class training extends AppCompatActivity implements View.OnClickListener{
 
+    static int picAttemptArray[];
     ImageView img;
     ImageButton btntick;
     RelativeLayout r1,r3;
@@ -49,6 +50,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     Calendar todayDate,lastDate;
 
     Button btnc1,btnc2,btnc3,btnc4;
+    int cue1=0,cue2=0,cue3=0,cue4=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,8 +67,9 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         btnc4 = (Button) findViewById(R.id.btn_cue4);
         meta=new Meta(this);
         todayDate=Calendar.getInstance();
-
         db = new ADB(this);
+
+
         handler = new Handler();
 
 
@@ -160,19 +163,56 @@ public class training extends AppCompatActivity implements View.OnClickListener{
               public void run() {
                   if(player!=null&&player.isPlaying()) {
                       handler.removeCallbacks(handlerRunnable);
-                      handler.postDelayed(this, interval * 1000);
+                      handler.postDelayed(this, (interval*1000)+player.getDuration());
+
                       if(ctr==4)
                           btnc4.setEnabled(true);
                       return;
                   }
+
                   stopPlayer();
                   player = MediaPlayer.create(getApplicationContext(), getResources().getIdentifier(img.getTag() + "_" + ctr, "raw", getPackageName()));
                   player.start();
+                  player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                      @Override
+                      public void onCompletion(MediaPlayer mediaPlayer) {
+                          switch (ctr-1){
+                              case 1:
+                                  cue1=1;
+                                  cue2=0;
+                                  cue3=0;
+                                  cue4=0;
+                                  break;
+
+                              case 2:
+                                  cue1=0;
+                                  cue2=1;
+                                  cue3=0;
+                                  cue4=0;
+                                  break;
+
+                              case 3:
+                                  cue1=0;
+                                  cue2=0;
+                                  cue3=1;
+                                  cue4=0;
+                                  break;
+
+                              case 4:
+                                  cue1=0;
+                                  cue2=0;
+                                  cue3=0;
+                                  cue4=1;
+                                  break;
+                          }
+                          db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],cue1,cue2,cue3,cue4);
+                      }
+                  });
                   ctr++;
                   if (ctr <4)
-                      handler.postDelayed(this, interval * 1000);
+                      handler.postDelayed(this, (interval * 1000)+player.getDuration());
                  else if(ctr==4) {
-                      handler.postDelayed(this, 1000 * 30);
+                      handler.postDelayed(this, (1000 * 30)+player.getDuration());
                       new Handler().postDelayed(new Runnable() {
                           @Override
                           public void run() {
@@ -227,23 +267,27 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                 setImg();
                 break;
             case R.id.btn_cue1 :
+                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],1,0,0,0);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_1","raw",getPackageName()));
                 player.start();
                 break;
 
             case R.id.btn_cue2 :
+                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,1,0,0);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_2","raw",getPackageName()));
                 player.start();
 
                 break;
             case R.id.btn_cue3 :
+                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,0,1,0);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_3","raw",getPackageName()));
                 player.start();
                 break;
             case R.id.btn_cue4 :
+                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,0,0,1);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_4","raw",getPackageName()));
                 player.start();
@@ -256,6 +300,9 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     void setImg(){
         position++;
         if(position<threashold&&position<pics.length) {
+            picAttemptArray=db.getLastAttemptFromTransaction(pics[position]);
+            if(picAttemptArray[0]==0)
+                Toast.makeText(getApplicationContext(),"Oooops.",Toast.LENGTH_SHORT).show();
             r1.startAnimation(AnimationUtils.loadAnimation (getApplicationContext(),R.anim.fromright));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 img.setImageDrawable(getDrawable(getResources().getIdentifier(pics[position], "drawable", getPackageName())));
@@ -264,8 +311,10 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                 img.setImageDrawable(getResources().getDrawable(getResources().getIdentifier(pics[position], "drawable", getPackageName())));
             }
             img.setTag(pics[position]);
-            if(handler!=null)
+            if(handler!=null) {
                 handler.removeCallbacks(handlerRunnable);
+                handler.removeCallbacksAndMessages(null);
+            }
             startTimer();
         }else {
             meta.setTodayTrainingOver(true);
@@ -288,8 +337,10 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             stopPlayer();
-            if(handler!=null)
+            if(handler!=null) {
                 handler.removeCallbacks(handlerRunnable);
+                handler.removeCallbacksAndMessages(null);
+            }
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.addCategory(Intent.CATEGORY_HOME);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -314,8 +365,10 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         super.onStop();
         if(wl.isHeld())
             wl.release();
-        if(handler!=null)
+        if(handler!=null) {
             handler.removeCallbacks(handlerRunnable);
+            handler.removeCallbacksAndMessages(null);
+        }
 
         todayDate=Calendar.getInstance();
         int last=lastDate.get(Calendar.DATE);
@@ -323,8 +376,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
 
         if(player!=null)
             player.stop();
-        if(handler!=null)
-            handler.removeCallbacks(handlerRunnable);
+
 
         meta.setTrainingPosition(position-1);
         if(last!=tod&&lastDate.getTimeInMillis()<todayDate.getTimeInMillis()){

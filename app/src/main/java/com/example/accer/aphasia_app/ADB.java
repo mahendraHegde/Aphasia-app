@@ -20,7 +20,7 @@ public class ADB extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION=1;
     public final static String DATABASE_NAME="APHASIA";
     private static final String TABLE_DATA="DATA";
-    private static final String TABLE_TRANSACTIONS="TRANSACTION";
+    private static final String TABLE_TRANSACTIONS="TRANSACTIONS";
 
     Context ctx;
 
@@ -41,21 +41,63 @@ public class ADB extends SQLiteOpenHelper {
         db.execSQL(createData);
 
         String createTransactions="create table  "+TABLE_TRANSACTIONS+" ( " +
-                "attempt_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "+
-                "pic_id INTEGER REFERENCES "+TABLE_DATA+"(\"id\")," +
+                "attempt_id INTEGER, "+
+                "pic_id INTEGER ," +
                 "cue1 INTGER DEFAULT 0," +
                 "cue2 INTGER DEFAULT 0," +
                 "cue3 INTGER DEFAULT 0," +
-                "cue4 INTGER DEFAULT 0" +
+                "cue4 INTGER DEFAULT 0," +
+                "PRIMARY KEY (attempt_id,pic_id)"+
                 ")";
+       // db.execSQL("PRAGMA foreign_keys=ON");
         db.execSQL(createTransactions);
 
     }
 
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
         db.execSQL("DROP TABLE IF  EXISTS "+TABLE_DATA);
+        db.execSQL("DROP TABLE IF  EXISTS "+TABLE_TRANSACTIONS);
         onCreate(db);
+    }
+
+    public int[] getLastAttemptFromTransaction(String pic){
+        SQLiteDatabase db=this.getReadableDatabase();
+        int []arr=new int[2];
+        Cursor cursor=db.query(TABLE_DATA,new String[] {"id"},"pic=?",new String[]{pic},null,null,null,null);
+        if(cursor.moveToFirst())
+            arr[0]=Integer.parseInt(cursor.getString(0));
+        else
+            arr[0]=0;
+        Cursor c=db.query(TABLE_TRANSACTIONS,new String[]{"MAX(attempt_id)"},"pic_id=?",new String[]{cursor.getString(0)},null,null,null,null);
+        if(c.moveToFirst()&&c.getString(0)!=null)
+          arr[1]=Integer.parseInt(c.getString(0));
+        else
+            arr[1]=0;
+        return arr;
+    }
+
+    public void addTransaction(int attempt,int pic_id,int cue1,int cue2,int cue3,int cue4){
+        SQLiteDatabase db=this.getWritableDatabase();
+        ContentValues values=new ContentValues();
+        values.put("attempt_id",attempt);
+        values.put("pic_id",pic_id);
+        values.put("cue1",cue1);
+        values.put("cue2",cue2);
+        values.put("cue3",cue3);
+        values.put("cue4",cue4);
+        try {
+            db.insertOrThrow(TABLE_TRANSACTIONS,null,values);
+            Toast.makeText(ctx,"insrtd",Toast.LENGTH_SHORT).show();
+        }catch (SQLiteConstraintException ex){
+            Toast.makeText(ctx,"updated",Toast.LENGTH_SHORT).show();
+            db.execSQL("update "+TABLE_TRANSACTIONS+" set cue1=cue1+"+cue1+ ",cue2=cue2+"+cue2+",cue3=cue3+"+cue3+",cue4=cue4+"+cue4+" where attempt_id="+attempt+" and pic_id="+pic_id);
+        }finally {
+            db.close();
+            SQLiteDatabase db1=this.getReadableDatabase();
+
+        }
     }
 
     public void addData(String pic){
@@ -138,9 +180,11 @@ public class ADB extends SQLiteOpenHelper {
         db.delete(TABLE_DATA,"id=?",new String[]{String.valueOf(id)});
         db.close();
     }
-    public void deleteAllData(){
+    public void deleteAllDataAndTransactions(){
         SQLiteDatabase db=this.getWritableDatabase();
         db.execSQL("DROP TABLE IF  EXISTS "+TABLE_DATA);
+        db.execSQL("DROP TABLE IF  EXISTS "+TABLE_TRANSACTIONS);
+
         onCreate(db);
     }
     public long getDataRowCount(){
