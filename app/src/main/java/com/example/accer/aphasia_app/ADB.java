@@ -20,6 +20,8 @@ public class ADB extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION=1;
     public final static String DATABASE_NAME="APHASIA";
     private static final String TABLE_DATA="DATA";
+    private static final String TABLE_TRANSACTIONS="TRANSACTION";
+
     Context ctx;
 
 
@@ -37,6 +39,17 @@ public class ADB extends SQLiteOpenHelper {
                 "valid INTEGER DEFAULT 1" +
                 ")";
         db.execSQL(createData);
+
+        String createTransactions="create table  "+TABLE_TRANSACTIONS+" ( " +
+                "attempt_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "+
+                "pic_id INTEGER REFERENCES "+TABLE_DATA+"(\"id\")," +
+                "cue1 INTGER DEFAULT 0," +
+                "cue2 INTGER DEFAULT 0," +
+                "cue3 INTGER DEFAULT 0," +
+                "cue4 INTGER DEFAULT 0" +
+                ")";
+        db.execSQL(createTransactions);
+
     }
 
     @Override
