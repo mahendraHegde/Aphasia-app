@@ -10,6 +10,7 @@
     android:paddingLeft="15dp"
     android:paddingRight="15dp"
     tools:context="com.example.accer.aphasia_app.training"
+    android:id="@+id/trainingConstraint"
     android:keepScreenOn="true">
 
 

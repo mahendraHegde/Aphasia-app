@@ -89,9 +89,7 @@ public class ADB extends SQLiteOpenHelper {
         values.put("cue4",cue4);
         try {
             db.insertOrThrow(TABLE_TRANSACTIONS,null,values);
-            Toast.makeText(ctx,"insrtd",Toast.LENGTH_SHORT).show();
         }catch (SQLiteConstraintException ex){
-            Toast.makeText(ctx,"updated",Toast.LENGTH_SHORT).show();
             db.execSQL("update "+TABLE_TRANSACTIONS+" set cue1=cue1+"+cue1+ ",cue2=cue2+"+cue2+",cue3=cue3+"+cue3+",cue4=cue4+"+cue4+" where attempt_id="+attempt+" and pic_id="+pic_id);
         }finally {
             db.close();
@@ -161,6 +159,24 @@ public class ADB extends SQLiteOpenHelper {
         int i=0;
         SQLiteDatabase db=this.getReadableDatabase();
         Cursor cursor=db.query(TABLE_DATA,new String[]{"pic"},field+"="+val,null,null,null,"id ASC",null);
+
+        String pics[]=new String[cursor.getCount()];
+
+        if(cursor.moveToFirst()){
+            do {
+                pics[i++] = cursor.getString(0);
+            }while (cursor.moveToNext());
+        }
+        db.close();
+        return  pics;
+    }
+
+
+    public String[] getDataPics(String field,String val,String limit){
+        int i=0;
+        SQLiteDatabase db=this.getReadableDatabase();
+       // Toast.makeText(ctx,"limit : "+limit,Toast.LENGTH_SHORT).show();
+        Cursor cursor=db.query(TABLE_DATA,new String[]{"pic"},field+"="+val,null,null,null,"id ASC",limit);
 
         String pics[]=new String[cursor.getCount()];
 

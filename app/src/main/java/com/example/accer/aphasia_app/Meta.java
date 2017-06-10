@@ -14,6 +14,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
+import java.nio.channels.FileChannel;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -31,6 +32,9 @@ public  class Meta implements Serializable {
     Calendar startDate;
     Calendar lastDate;
     boolean todayTrainingOver,baselineOver;
+    private String failedPics[];//stores failed pics of an attempt (will be reset everyday)
+    private boolean dailyPicsOver;//check whether to repeat failed attempt or to continue with regular pics
+    private boolean failedLooping;
    static Context ctx;
     Meta(Context c){
         ctx=c;
@@ -44,8 +48,37 @@ public  class Meta implements Serializable {
         time2="";
         todayTrainingOver=false;
         baselineOver=false;
+        failedPics=null;
+        dailyPicsOver=false;
+        failedLooping=false;
         setCalendar();
+
     }
+
+    public boolean isFailedLooping() {
+        return failedLooping;
+    }
+
+    public void setFailedLooping(boolean failedLooping) {
+        this.failedLooping = failedLooping;
+    }
+
+    public boolean isDailyPicsOver() {
+        return dailyPicsOver;
+    }
+
+    public void setDailyPicsOver(boolean dailyPicsOver) {
+        this.dailyPicsOver = dailyPicsOver;
+    }
+
+    public String[] getFailedPics() {
+        return failedPics;
+    }
+
+    public void setFailedPics(String[] failedPics) {
+        this.failedPics = failedPics;
+    }
+
     private void setCalendar(){
         startDate=Calendar.getInstance();
         startDate.set(Calendar.YEAR,1700);
@@ -72,6 +105,7 @@ public  class Meta implements Serializable {
 
     public Calendar getStartDate() {
         return startDate;
+
     }
 
     public void setStartDate(Calendar startDate) {
@@ -197,15 +231,39 @@ public  class Meta implements Serializable {
             }
         }
     }
-/*
+
+    void backup(){
+        try {
+            File sd = Environment.getExternalStorageDirectory();
+            File data = Environment.getDataDirectory();
+
+            if (sd.canWrite()) {
+                String currentDBPath = "//data/"+ctx.getPackageName()+"/databases/"+ADB.DATABASE_NAME;
+                String backupDBPath = ADB.DATABASE_NAME;
+                File currentDB = new File(data, currentDBPath);
+                File backupDB = new File(sd, backupDBPath);
+
+                if (currentDB.exists()) {
+                    FileChannel src = new FileInputStream(currentDB).getChannel();
+                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                    Toast.makeText(ctx, "Backup is successful to SD card", Toast.LENGTH_SHORT).show();
+                }
+            }
+        } catch (Exception e) {
+        }
+    }
+
     public void restoreDataBase(){
         try {
             File sd = Environment.getExternalStorageDirectory();
             File data = Environment.getDataDirectory();
 
             if (sd.canWrite()) {
-                String currentDBPath = "//data/package name/databases/database_name";
-                String backupDBPath = "database_name";
+                String currentDBPath = "//data/"+ctx.getPackageName()+"/databases/"+ADB.DATABASE_NAME;
+                String backupDBPath = ADB.DATABASE_NAME;
                 File currentDB = new File(data, currentDBPath);
                 File backupDB = new File(sd, backupDBPath);
 
@@ -215,12 +273,12 @@ public  class Meta implements Serializable {
                     dst.transferFrom(src, 0, src.size());
                     src.close();
                     dst.close();
-                    Toast.makeText(getApplicationContext(), "Database Restored successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ctx, "Database Restored successfully", Toast.LENGTH_SHORT).show();
                 }
             }
         } catch (Exception e) {
         }
-    }*/
+    }
 
 
 
