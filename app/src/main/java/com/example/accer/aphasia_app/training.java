@@ -1,5 +1,8 @@
 package com.example.accer.aphasia_app;
-
+/*
+* one bug found
+*
+* */
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,7 +11,9 @@ import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.Vibrator;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,10 +31,12 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 
 public class training extends AppCompatActivity implements View.OnClickListener{
 
+    static int picAttemptArray[];
     ImageView img;
     ImageButton btntick;
     RelativeLayout r1,r3;
@@ -37,10 +44,11 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     PowerManager pm;
     PowerManager.WakeLock wl;
     int position=-1;
-     int interval=5,savedCtr=1;
+     int interval=2,savedCtr=1,maxGivenTime=25,ctr;
     int threashold=0;
     static  MediaPlayer player;
-    String pics[];
+    String pics[]=null;
+    ArrayList<String>failedPicsArralist=null;
     ADB db;
     Handler handler=null;
     Runnable handlerRunnable=null;
@@ -49,6 +57,8 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     Calendar todayDate,lastDate;
 
     Button btnc1,btnc2,btnc3,btnc4;
+    int cue1=0,cue2=0,cue3=0,cue4=0;
+    Handler maxGivenTimeHandler=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,9 +75,12 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         btnc4 = (Button) findViewById(R.id.btn_cue4);
         meta=new Meta(this);
         todayDate=Calendar.getInstance();
-
+        failedPicsArralist=new ArrayList<String>();
         db = new ADB(this);
+
+
         handler = new Handler();
+        maxGivenTimeHandler=new Handler();
 
 
 
@@ -77,24 +90,34 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         btnc3.setOnClickListener(this);
         btnc4.setOnClickListener(this);
 
-        pics = db.getDataPics("valid","1");
-
         if(meta.read()!=null){
             meta=meta.read();
-            position=(meta.getDay()*meta.getNoOfQuestions())-1;
+            position=-1;
             if(meta.getLastDate().get(Calendar.DATE)==todayDate.get(Calendar.DATE)
                     &&meta.getLastDate().get(Calendar.MONTH)==todayDate.get(Calendar.MONTH)
-                    &&meta.getLastDate().get(Calendar.YEAR)==todayDate.get(Calendar.YEAR))
-                 position=meta.getTrainingPosition();
-            threashold =position+meta.getNoOfQuestions()+1>pics.length?pics.length:position+meta.getNoOfQuestions()+1;
-            savedCtr=meta.getTrainingSavedCounter();
+                    &&meta.getLastDate().get(Calendar.YEAR)==todayDate.get(Calendar.YEAR)) {
+                position = meta.getTrainingPosition();
+                if(meta.isFailedLooping()  /*meta.isDailyPicsOver()&&meta.getFailedPics().length>0*/) {
+                    pics=meta.getFailedPics();
+
+                } else {
+                    pics = db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions());
+                }
+                if(!meta.isDailyPicsOver()&&meta.getFailedPics()!=null){
+                    failedPicsArralist=new ArrayList<String>(Arrays.asList(meta.getFailedPics()));
+                }
+            }else
+                pics = db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions());
+                threashold=pics.length;
+
         }
         if(meta.isTodayTrainingOver()){
             finish();
         }
         lastDate=meta.getLastDate();
-
+        //Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
         setImg();
+        //Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -144,9 +167,45 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         btnc4.setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) (width * .35 * .085));
 
 
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Snackbar.make(findViewById(R.id.trainingConstraint),"ಕೇವಲ 1 ನಿಮಿಷ ಉಳಿದಿದೆ",Snackbar.LENGTH_LONG).show();
+                Vibrator v = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(1000);
+            }
+        },1000*60*(maxGivenTime-1));
+
+        maxGivenTimeHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(wl!=null&&wl.isHeld())
+                    wl.release();
+                if(handler!=null) {
+                    handler.removeCallbacks(handlerRunnable);
+                    handler.removeCallbacksAndMessages(null);
+                }
+                meta.setTodayTrainingOver(true);
+                meta.setLastDate(todayDate);
+                meta.setDailyPicsOver(false);
+                meta.setFailedPics(null);
+                meta.setFailedLooping(false);
+                meta.write();
+                if(handler!=null) {
+                    handler.removeCallbacks(handlerRunnable);
+                    handler.removeCallbacksAndMessages(null);
+                }
+                Intent i=new Intent(getApplicationContext(),Instructions.class);
+                i.putExtra("activity","training");
+                startActivity(i);
+            }
+        },maxGivenTime*1000*60);
+
         pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WakeLock");
         wl.acquire(interval * 1000);
+
+
     }
 
   public void startTimer(){
@@ -154,25 +213,62 @@ public class training extends AppCompatActivity implements View.OnClickListener{
       btnc2.setEnabled(false);
       btnc3.setEnabled(false);
       btnc4.setEnabled(false);
+      ctr=1;
           handlerRunnable=new Runnable() {
-              int ctr=1;
               @Override
               public void run() {
                   if(player!=null&&player.isPlaying()) {
                       handler.removeCallbacks(handlerRunnable);
-                      handler.postDelayed(this, interval * 1000);
+                      handler.postDelayed(this, (interval*1000)+player.getDuration());
+
                       if(ctr==4)
                           btnc4.setEnabled(true);
                       return;
                   }
+
                   stopPlayer();
                   player = MediaPlayer.create(getApplicationContext(), getResources().getIdentifier(img.getTag() + "_" + ctr, "raw", getPackageName()));
                   player.start();
+                  player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                      @Override
+                      public void onCompletion(MediaPlayer mediaPlayer) {
+                          switch (ctr-1){
+                              case 1:
+                                  cue1=1;
+                                  cue2=0;
+                                  cue3=0;
+                                  cue4=0;
+                                  break;
+
+                              case 2:
+                                  cue1=0;
+                                  cue2=1;
+                                  cue3=0;
+                                  cue4=0;
+                                  break;
+
+                              case 3:
+                                  cue1=0;
+                                  cue2=0;
+                                  cue3=1;
+                                  cue4=0;
+                                  break;
+
+                              case 4:
+                                  cue1=0;
+                                  cue2=0;
+                                  cue3=0;
+                                  cue4=1;
+                                  break;
+                          }
+                          db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],cue1,cue2,cue3,cue4);
+                      }
+                  });
                   ctr++;
                   if (ctr <4)
-                      handler.postDelayed(this, interval * 1000);
+                      handler.postDelayed(this, (interval * 1000)+player.getDuration());
                  else if(ctr==4) {
-                      handler.postDelayed(this, 1000 * 30);
+                      handler.postDelayed(this, (1000 * 2/*30*/)+player.getDuration());
                       new Handler().postDelayed(new Runnable() {
                           @Override
                           public void run() {
@@ -189,12 +285,20 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                       },1000*30);
 
                   }
-                  else if(position<threashold-1) {
+                  else if(position<=threashold-1) {
                       new Handler().postDelayed(new Runnable() {
                           @Override
                           public void run() {
                               if(player!=null&&player.isPlaying()){
                                   new Handler().postDelayed(this,6000);
+
+                                  /*stores failed attempts for next iteration(in secondary storage)*/
+                                  if(failedPicsArralist!=null&&!failedPicsArralist.contains(pics[position])) {
+                                      failedPicsArralist.add(pics[position]);
+                                      meta.setFailedPics(failedPicsArralist.toArray(new String[failedPicsArralist.size()]));
+                                      meta.write();
+                                  }
+
                                   btntick.setEnabled(false);
                                   return;
                               }
@@ -221,29 +325,49 @@ public class training extends AppCompatActivity implements View.OnClickListener{
       int id=view.getId();
         switch (id){
             case R.id.btn_tick :
+                if(failedPicsArralist!=null&&failedPicsArralist.contains(pics[position])) {
+                    failedPicsArralist.remove(pics[position]);
+                        ArrayList<String> temp=new ArrayList<String>(Arrays.asList(pics));
+                        if(temp.contains(pics[position])){
+                            temp.remove(pics[position]);
+                            pics=new String[temp.size()];
+                            pics=temp.toArray(pics);
+                        }
+                        meta.setFailedPics(failedPicsArralist.toArray(new String[failedPicsArralist.size()]));
+                        meta.write();
+                }
+
+                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,0,0,0);
                 stopPlayer();
                 player=MediaPlayer.create(this,R.raw.tick_sound);
                 player.start();
                 setImg();
+                if(meta.isFailedLooping()&&threashold<=position) {
+                    cleanUp();
+                }
                 break;
             case R.id.btn_cue1 :
+                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],1,0,0,0);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_1","raw",getPackageName()));
                 player.start();
                 break;
 
             case R.id.btn_cue2 :
+                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,1,0,0);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_2","raw",getPackageName()));
                 player.start();
 
                 break;
             case R.id.btn_cue3 :
+                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,0,1,0);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_3","raw",getPackageName()));
                 player.start();
                 break;
             case R.id.btn_cue4 :
+                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,0,0,1);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_4","raw",getPackageName()));
                 player.start();
@@ -255,7 +379,8 @@ public class training extends AppCompatActivity implements View.OnClickListener{
 
     void setImg(){
         position++;
-        if(position<threashold&&position<pics.length) {
+        if(position<threashold&&position<pics.length&&position>-1) {
+            picAttemptArray=db.getLastAttemptFromTransaction(pics[position]);
             r1.startAnimation(AnimationUtils.loadAnimation (getApplicationContext(),R.anim.fromright));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 img.setImageDrawable(getDrawable(getResources().getIdentifier(pics[position], "drawable", getPackageName())));
@@ -264,17 +389,32 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                 img.setImageDrawable(getResources().getDrawable(getResources().getIdentifier(pics[position], "drawable", getPackageName())));
             }
             img.setTag(pics[position]);
-            if(handler!=null)
+            if(handler!=null) {
                 handler.removeCallbacks(handlerRunnable);
+                handler.removeCallbacksAndMessages(null);
+            }
             startTimer();
         }else {
-            meta.setTodayTrainingOver(true);
-            meta.setLastDate(todayDate);
-            meta.write();
-            Intent i=new Intent(getApplicationContext(),Instructions.class);
-            i.putExtra("activity","training");
-            startActivity(i);
-        }
+            if(handler!=null) {
+                handler.removeCallbacks(handlerRunnable);
+                handler.removeCallbacksAndMessages(null);
+            }
+                if(meta.read()!=null){
+                    meta=meta.read();
+                    position=-1;
+                    pics=new String[failedPicsArralist.size()];
+                    if(failedPicsArralist.size()<=0) {
+                        cleanUp();
+                        return;
+                    }
+                    pics=failedPicsArralist.toArray(pics);
+                    failedPicsArralist=new ArrayList<>();
+                    meta.setFailedLooping(true);
+                    meta.write();
+                    threashold =pics.length;
+                    setImg();
+                }
+            }
     }
     void stopPlayer(){
         if(player!=null){
@@ -288,13 +428,16 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             stopPlayer();
-            if(handler!=null)
+            meta.backup();
+            if(handler!=null) {
                 handler.removeCallbacks(handlerRunnable);
+                handler.removeCallbacksAndMessages(null);
+            }
+            finish();
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.addCategory(Intent.CATEGORY_HOME);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            finish();
             return;
         }
         this.doubleBackToExitPressedOnce = true;
@@ -309,30 +452,44 @@ public class training extends AppCompatActivity implements View.OnClickListener{
 
     }
 
+
     @Override
     protected void onStop() {
         super.onStop();
+        meta.backup();
         if(wl.isHeld())
             wl.release();
-        if(handler!=null)
+        if(handler!=null) {
             handler.removeCallbacks(handlerRunnable);
+            handler.removeCallbacksAndMessages(null);
+        }
 
         todayDate=Calendar.getInstance();
         int last=lastDate.get(Calendar.DATE);
         int tod=todayDate.get(Calendar.DATE);
 
-        if(player!=null)
-            player.stop();
-        if(handler!=null)
-            handler.removeCallbacks(handlerRunnable);
-
+        stopPlayer();
         meta.setTrainingPosition(position-1);
-        if(last!=tod&&lastDate.getTimeInMillis()<todayDate.getTimeInMillis()){
-            meta.setDay(meta.getDay()+1);
-        }
         meta.setLastDate(todayDate);
-        //meta.setTrainingSavedCounter(ctr-1);
-        //Toast.makeText(getApplicationContext(),ctr,Toast.LENGTH_LONG).show();
         meta.write();
+    }
+
+    void cleanUp(){
+        if(wl!=null&&wl.isHeld())
+            wl.release();
+        if(handler!=null) {
+            handler.removeCallbacks(handlerRunnable);
+            handler.removeCallbacksAndMessages(null);
+        }
+        meta.setTodayTrainingOver(true);
+        meta.setLastDate(todayDate);
+        meta.setDailyPicsOver(false);
+        meta.setFailedPics(null);
+        meta.setFailedLooping(false);
+        meta.write();
+        finish();
+        Intent i=new Intent(getApplicationContext(),Instructions.class);
+        i.putExtra("activity","training");
+        startActivity(i);
     }
 }

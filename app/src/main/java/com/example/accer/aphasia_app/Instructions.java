@@ -75,16 +75,19 @@ public class Instructions extends AppCompatActivity {
         if(last!=tod&&meta.getLastDate().getTimeInMillis()<Calendar.getInstance().getTimeInMillis()){
             meta.setDay(meta.getDay()+1);
             meta.setTodayTrainingOver(false);
+            meta.setFailedPics(null);
+            meta.setDailyPicsOver(false);
+            meta.setFailedLooping(false);
         }
         meta.write();
-
         if(meta.isTodayTrainingOver()){
             new AlertDialog.Builder(this)
                     .setTitle("over")
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(""+meta.isTodayTrainingOver(), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                             Intent intent = new Intent(Intent.ACTION_MAIN);
+                            finish();
+                            Intent intent = new Intent(Intent.ACTION_MAIN);
                                 intent.addCategory(Intent.CATEGORY_HOME);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
@@ -108,8 +111,6 @@ public class Instructions extends AppCompatActivity {
             training =true;
 
 
-
-        //Toast.makeText(getApplicationContext(),""+ calendar.get(Calendar.DAY_OF_MONTH),Toast.LENGTH_LONG).show();
 
         if(training){
             if(meta.getNoOfQuestions()==0)
@@ -205,12 +206,4 @@ public class Instructions extends AppCompatActivity {
 
     }
 
-    void dateDiff(Date d1,Date d2){
-        long diff = d1.getTime() - d2.getTime();
-        long seconds = diff / 1000;
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
-
-    }
 }

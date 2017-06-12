@@ -36,17 +36,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setUp();
+    }
+
+    void setUp(){
         db=new ADB(this);
         c=Calendar.getInstance();
+        meta=new Meta(this);
         if(db.getDataRowCount()<=0) {
-            Toast.makeText(getApplicationContext(),db.getDataRowCount()+"",Toast.LENGTH_SHORT).show();
+            meta.deleteBackup();
             for (int i = 1; i <= totalNoOfPics; i++) {
                 db.addData("train_" + i);
             }
         }
-      //  backup();
-        meta=new Meta(this);
-       // meta.deleteBackup();
+
+        // meta.deleteBackup();
 
 
 
@@ -72,21 +76,20 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         }else {
 
-             permission = ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            permission = ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
             if (permission!=PackageManager.PERMISSION_GRANTED){
 
-                    ActivityCompat.requestPermissions(
-                            this,
-                            PERMISSIONS_STORAGE,
-                            REQUEST_EXTERNAL_STORAGE
-                    );
+                ActivityCompat.requestPermissions(
+                        this,
+                        PERMISSIONS_STORAGE,
+                        REQUEST_EXTERNAL_STORAGE
+                );
             }else {
                 startActivity(new Intent(this, BaselineTest.class));
             }
 
         }
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -119,33 +122,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        setUp();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        setUp();
+
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if(db!=null)
             db.close();
-    }
-
-    void backup(){
-        try {
-            File sd = Environment.getExternalStorageDirectory();
-            File data = Environment.getDataDirectory();
-
-            if (sd.canWrite()) {
-                String currentDBPath = "//data/"+getPackageName()+"/databases/"+ADB.DATABASE_NAME;
-                String backupDBPath = ADB.DATABASE_NAME;
-                File currentDB = new File(data, currentDBPath);
-                File backupDB = new File(sd, backupDBPath);
-
-                if (currentDB.exists()) {
-                    FileChannel src = new FileInputStream(currentDB).getChannel();
-                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
-                    dst.transferFrom(src, 0, src.size());
-                    src.close();
-                    dst.close();
-                    Toast.makeText(getApplicationContext(), "Backup is successful to SD card", Toast.LENGTH_SHORT).show();
-                }
-            }
-        } catch (Exception e) {
-        }
     }
 }
