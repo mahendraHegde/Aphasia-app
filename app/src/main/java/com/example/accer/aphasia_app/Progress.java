@@ -34,11 +34,19 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
     Button rightbtn, leftbtn;
     int i;
     private BarChart mChart;
+    int valid,invalid;
+    Meta meta;
+    ADB db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_progress);
+        meta=new Meta(this);
+        if(meta.read()!=null){
+            meta=meta.read();
+        }
+        db=new ADB(this);
 
         linearLayout = (LinearLayout) findViewById(R.id.dayContainer);
         horizontalScrollView = (HorizontalScrollView) findViewById(R.id.scroller);
@@ -83,9 +91,17 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
 
         ArrayList<BarEntry> yVals1 = new ArrayList<BarEntry>();
 
-        for (int i = 0; i < 30; i++) {
-            float val1 = (float) 2;//successful
-            float val2 = (float) 2;//successful-unsuccessful
+        for (int i = 0; i <30; i++) {
+            valid=0;
+            invalid=0;
+            if(i<=meta.getDay()) {
+                valid = db.getSuccessfulPicsCount(i);
+                invalid = meta.getNoOfQuestions() - valid;
+            }
+
+
+            float val1 = (float) valid;//successful
+            float val2 = (float) invalid;//successful-unsuccessful
 
             yVals1.add(new BarEntry(
                     i,
@@ -122,9 +138,10 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
             final Button btn = new Button(this);
             btn.setId(i);
             btn.setText("" + btn.getId());
+            if(i>meta.getDay()+1)
+                btn.setEnabled(false);
             btn.setBackgroundResource(R.drawable.circle_button);
             linearLayout.addView(btn, layoutParams);
-            //btn = ((Button) findViewById(btn.getId()));
             btn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     Toast.makeText(view.getContext(),

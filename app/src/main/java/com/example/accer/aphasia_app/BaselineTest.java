@@ -64,10 +64,9 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
             meta.write();
         }
         if(meta.baselineOver){
-            Intent in=new Intent(getApplicationContext(),Instructions.class);
-            in.putExtra("activity","training");
-            startActivity(in);
             finish();
+            Intent in=new Intent(getApplicationContext(),Home.class);
+            startActivity(in);
         }
         countDownTimer=new CountDownTimer(interval*1000,1000) {
             @Override
