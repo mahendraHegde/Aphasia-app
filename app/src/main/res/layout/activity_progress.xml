@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient"
+    >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Title"
+        android:textSize="30sp"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/title1"
+        />
+    <Button
+        android:layout_width="45dp"
+        android:layout_height="70dp"
+        android:id="@+id/back"
+        android:layout_below="@id/title1"/>
+
+    <HorizontalScrollView
+        android:layout_width="595dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title1"
+        android:scrollbars="none"
+        android:id="@+id/scroller"
+        android:layout_toRightOf="@id/back">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="10dp"
+            android:id="@+id/dayContainer">
+        </LinearLayout>
+    </HorizontalScrollView>
+    <Button
+        android:layout_width="45dp"
+        android:layout_height="70dp"
+        android:id="@+id/next"
+        android:layout_below="@id/title1"
+        android:layout_toRightOf="@id/scroller"/>
+
+
+    <com.github.mikephil.charting.charts.BarChart
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:id="@+id/monthlyGraph"
+        android:layout_below="@id/next"
+        />
+
+</RelativeLayout>
