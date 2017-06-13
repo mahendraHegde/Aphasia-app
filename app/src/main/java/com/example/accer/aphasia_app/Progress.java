@@ -1,5 +1,6 @@
 package com.example.accer.aphasia_app;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -74,7 +75,7 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
         XAxis xLabels = mChart.getXAxis();
         xLabels.setPosition(XAxis.XAxisPosition.BOTTOM);
         xLabels.setDrawLabels(true);
-        ArrayList<String> theDays=new ArrayList<>();
+        final ArrayList<String> theDays=new ArrayList<>();
         for(int i=1;i<=30;i++)
         {
             theDays.add("Day"+i);
@@ -98,8 +99,6 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
                 valid = db.getSuccessfulPicsCount(i);
                 invalid = meta.getNoOfQuestions() - valid;
             }
-
-
             float val1 = (float) valid;//successful
             float val2 = (float) invalid;//successful-unsuccessful
 
@@ -144,9 +143,9 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
             linearLayout.addView(btn, layoutParams);
             btn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    Toast.makeText(view.getContext(),
-                            "Button clicked index = " + btn.getId(), Toast.LENGTH_SHORT)
-                            .show();
+                    Intent in=new Intent(getApplicationContext(),DailyReport.class);
+                    in.putExtra("day",btn.getId());
+                    startActivity(in);
                 }
             });
         }

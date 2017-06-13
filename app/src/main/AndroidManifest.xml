@@ -49,7 +49,10 @@
             android:exported="true"
             android:screenOrientation="landscape">
         </activity>
-        <activity android:name=".DailyReport"></activity>
+        <activity android:name=".DailyReport"
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="landscape"></activity>
     </application>
 
 </manifest>
