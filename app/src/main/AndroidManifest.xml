@@ -41,14 +41,25 @@
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:screenOrientation="landscape"></activity>
-        <!--<activity android:name=".Home"
+
+        <activity android:name=".Home"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:screenOrientation="landscape">
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:screenOrientation="landscape">
-        </activity>-->
+        </activity>
+
+        <activity android:name=".Home"
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="landscape">
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="landscape">
+        </activity>
+>>>>>>> master
         <activity android:name=".DailyReport"
             android:configChanges="orientation|screenSize"
             android:exported="true"

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
     public class DailyReport extends AppCompatActivity implements View.OnTouchListener {
 
@@ -19,11 +20,15 @@ import android.widget.TextView;
 
         ScrollView leftScroll,verticalScroll;
         HorizontalScrollView topScroll,horzScroll;
+        int day;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_daily_report);
+
+        day=getIntent().getIntExtra("day",0);
+        Toast.makeText(getApplicationContext(),""+day,Toast.LENGTH_LONG).show();
 
         leftScroll=(ScrollView)findViewById(R.id.leftScroll);
         verticalScroll=(ScrollView)findViewById(R.id.verticalScroll);

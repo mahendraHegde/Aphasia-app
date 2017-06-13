@@ -98,6 +98,21 @@ public class ADB extends SQLiteOpenHelper {
         }
     }
 
+    public  int getSuccessfulPicsCount(int day){
+        int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
+        SQLiteDatabase db=this.getReadableDatabase();
+        String limit=(day*noOfQuestions)+","+noOfQuestions;
+        //Toast.makeText(ctx,"limit="+limit,Toast.LENGTH_LONG).show();
+
+        //String []pics=getDataPics("valid","1",(day*noOfQuestions)+","+noOfQuestions);
+       Cursor cursor=db.rawQuery("select count(pic_id) from "+TABLE_TRANSACTIONS +" where cue4=? and attempt_id=? and pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") ",new String[]{"0","1","1"});
+        //Cursor cursor=db.rawQuery("select count(id) from "+TABLE_DATA+"  limit "+limit+"",null);
+        cursor.moveToFirst();
+        return cursor.getInt(0);
+
+    }
+
+
     public void addData(String pic){
         SQLiteDatabase db=this.getWritableDatabase();
         ContentValues values=new ContentValues();

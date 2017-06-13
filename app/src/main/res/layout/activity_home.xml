@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.accer.aphasia_app.Home"
+    android:background="@drawable/home_background">
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Progress"
+        app:layout_constraintTop_toTopOf="@+id/btn_training"
+        android:layout_marginTop="8dp"
+        android:id="@+id/btn_progress"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:background="@drawable/talk_button"
+        android:textSize="25sp"
+        android:textColor="#fff"
+        />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Training"
+        tools:layout_editor_absoluteY="78dp"
+        android:id="@+id/btn_training"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:background="@drawable/talk_button"
+        android:textSize="25sp"
+        android:textColor="#fff"/>
+
+</android.support.constraint.ConstraintLayout>

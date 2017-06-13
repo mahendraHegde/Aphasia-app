@@ -18,21 +18,24 @@
     <Button
         android:layout_width="45dp"
         android:layout_height="70dp"
+        android:layout_marginLeft="0dp"
         android:id="@+id/back"
         android:layout_below="@id/title1"/>
 
     <HorizontalScrollView
-        android:layout_width="595dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/title1"
         android:scrollbars="none"
         android:id="@+id/scroller"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="50dp"
         android:layout_toRightOf="@id/back">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingTop="10dp"
+
             android:id="@+id/dayContainer">
         </LinearLayout>
     </HorizontalScrollView>
@@ -41,6 +44,7 @@
         android:layout_height="70dp"
         android:id="@+id/next"
         android:layout_below="@id/title1"
+        android:layout_marginLeft="-50dp"
         android:layout_toRightOf="@id/scroller"/>
 
 

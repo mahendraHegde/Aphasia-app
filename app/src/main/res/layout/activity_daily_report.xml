@@ -47,10 +47,11 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:layout_below="@id/topScroll"
-        android:layout_toRightOf="@id/leftScroll"
         android:id="@+id/verticalScroll"
-        android:background="#ffff00">
+        android:background="#ffff00"
+        android:layout_below="@+id/topScroll"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
