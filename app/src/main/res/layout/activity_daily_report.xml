@@ -5,43 +5,78 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.accer.aphasia_app.DailyReport">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/titleText"
+        android:text="ದೈನಂದಿನ ವರದಿ : ದಿನ"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:background="#ffff00" />
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="#00ff00"
+        android:id="@+id/options"
+        android:layout_below="@+id/titleText">
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ಎಲ್ಲಾ ಫಲಿತಾಂಶಗಳು"
+            android:id="@+id/rdb1" />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ಮೊದಲ ಫಲಿತಾಂಶ"
+            android:id="@+id/rdb2" />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ಇತರ ಫಲಿತಾಂಶಗಳು"
+            android:id="@+id/rdb3" />
+    </RadioGroup>
     <TextView
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:id="@+id/days"
         android:text="@string/table_activity_title"
         android:textSize="20dp"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/options"/>
 
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:layout_toRightOf="@+id/days"
         android:id="@+id/topScroll"
-        android:background="#fff">
+        android:background="#fff"
+        android:layout_below="@+id/options"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:id="@+id/topImage"
-            android:padding="5dp"
-            android:background="#fff">
+            android:id="@+id/topImage">
 
         </LinearLayout>
     </HorizontalScrollView>
+
     <ScrollView
         android:layout_width="100dp"
         android:layout_height="200dp"
         android:layout_below="@+id/topScroll"
         android:id="@+id/leftScroll"
-        android:background="#ff00ff">
+        android:background="#ffffff">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:background="#ff00ff"
+            android:background="#ffffff"
             android:id="@+id/attempts"
-            android:padding="7dp">
+            android:padding="5dp">
 
         </LinearLayout>
     </ScrollView>
@@ -49,18 +84,19 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:layout_below="@id/topScroll"
-        android:layout_toRightOf="@id/leftScroll"
         android:id="@+id/verticalScroll"
-        android:background="#fff">
+        android:background="#ffffff"
+        android:layout_below="@+id/topScroll"
+        android:layout_toRightOf="@id/leftScroll">
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/horzScroll">
+            android:id="@+id/horzScroll"
+            android:padding="0dp"
+            android:layout_margin="0dp">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#ffff00"
                 android:orientation="vertical"
                 android:id="@+id/count">
             </LinearLayout>
@@ -71,12 +107,16 @@
         android:layout_width="match_parent"
         android:layout_height="75dp"
         android:layout_below="@+id/verticalScroll"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:gravity="bottom"
+        android:background="#f1f1f1"
+        android:id="@+id/choice">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/table_activity_question"
-            android:textSize="20dp"/>
+            android:textSize="20dp"
+            android:id="@+id/question"/>
 
         <Button
             android:layout_width="wrap_content"
@@ -89,5 +129,4 @@
 
 
     </RelativeLayout>
-
 </RelativeLayout>

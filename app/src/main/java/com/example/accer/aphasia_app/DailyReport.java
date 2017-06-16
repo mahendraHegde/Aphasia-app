@@ -1,9 +1,13 @@
 package com.example.accer.aphasia_app;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
+import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,27 +16,32 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-    public class DailyReport extends AppCompatActivity implements View.OnTouchListener {
+public class DailyReport extends AppCompatActivity implements View.OnTouchListener {
 
-        LinearLayout topLinearLayout,leftLinearLayout,dataCountContainer,linearLayout;
-        LinearLayout.LayoutParams topLayoutParams,leftLayoutParams,dataCountParams,layoutParams;
-
-        ScrollView leftScroll,verticalScroll;
-        HorizontalScrollView topScroll,horzScroll;
-
-
-
-        int day;
-        Meta meta;
-        String pics[]=null;
-        ADB db=null;
-        Button btnRetry;
+    TextView titleText,days;
+    RadioGroup options;
+    RadioButton rdb1,rdb2,rdb3;
+    HorizontalScrollView topLinearLayout,horzScroll;
+    ScrollView leftLinearLayout,dataCountContainer;
+    LinearLayout.LayoutParams topLayoutParams,leftLayoutParams,dataCountParams,layoutParams;
+    RelativeLayout choice;
+    LinearLayout topLinear,leftLinear,dataLinear;
 
 
+    int day;
+    Meta meta;
+    String pics[]=null;
+    ADB db=null;
+    Button btnRetry;
+    ViewGroup.LayoutParams lp;
+    int width,height;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,11 +50,41 @@ import android.widget.Toast;
         day=getIntent().getIntExtra("day",0);
         day--;
 
-        leftScroll=(ScrollView)findViewById(R.id.leftScroll);
-        verticalScroll=(ScrollView)findViewById(R.id.verticalScroll);
-        topScroll=(HorizontalScrollView)findViewById(R.id.topScroll);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+         height = displayMetrics.heightPixels;
+        width = displayMetrics.widthPixels;
+
+        titleText=(TextView)findViewById(R.id.titleText);
+        days=(TextView)findViewById(R.id.days);
+        options=(RadioGroup)findViewById(R.id.options);
+        rdb1=(RadioButton)findViewById(R.id.rdb1);
+        rdb2=(RadioButton)findViewById(R.id.rdb2);
+        rdb3=(RadioButton)findViewById(R.id.rdb3);
+        topLinearLayout=(HorizontalScrollView) findViewById(R.id.topScroll);
+        leftLinearLayout=(ScrollView) findViewById(R.id.leftScroll);
+        dataCountContainer=(ScrollView)findViewById(R.id.verticalScroll);
         horzScroll=(HorizontalScrollView)findViewById(R.id.horzScroll);
+        choice=(RelativeLayout)findViewById(R.id.choice);
+        topLinear=(LinearLayout)findViewById(R.id.topImage);
+        leftLinear=(LinearLayout)findViewById(R.id.attempts);
+        dataLinear=(LinearLayout)findViewById(R.id.count);
         btnRetry=(Button)findViewById(R.id.btn_yes);
+
+        rdb1.setChecked(true);
+
+        options.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, @IdRes int i) {
+                switch (i){
+                    case R.id.rdb1 :
+                        Toast.makeText(getApplicationContext(),"s",Toast.LENGTH_LONG).show();
+                        break;
+                }
+            }
+        });
+
 
         btnRetry.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,88 +100,132 @@ import android.widget.Toast;
         if(meta.read()!=null)
             meta=meta.read();
 
-        leftScroll.setOnTouchListener(this);
-        verticalScroll.setOnTouchListener(this);
-        topScroll.setOnTouchListener(this);
+
+        topLinearLayout.setOnTouchListener(this);
+        leftLinearLayout.setOnTouchListener(this);
+        dataCountContainer.setOnTouchListener(this);
         horzScroll.setOnTouchListener(this);
 
+        lp=titleText.getLayoutParams();
+        lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+        lp.height= (int) (height*.1);
+        titleText.setLayoutParams(lp);
 
-        topLinearLayout = (LinearLayout) findViewById(R.id.topImage);
-        leftLinearLayout=(LinearLayout)findViewById(R.id.attempts);
-        dataCountContainer=(LinearLayout)findViewById(R.id.count);
+        lp=options.getLayoutParams();
+        lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+        lp.height= (int) (height*.1);
+        options.setLayoutParams(lp);
 
-        topLayoutParams = new LinearLayout.LayoutParams(200, 200);
-        topLayoutParams.setMargins(10, 10, 10, 10);
+        lp=options.getLayoutParams();
+        lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+        lp.height= (int) (height*.1);
+        options.setLayoutParams(lp);
 
-        leftLayoutParams = new LinearLayout.LayoutParams(200, 100);
-        leftLayoutParams.setMargins(10, 40, 10, 10);
+        lp=topLinearLayout.getLayoutParams();
+        lp.width= (int) (width*.85);
+        lp.height= (int) (height*.15);
+        topLinearLayout.setLayoutParams(lp);
+
+        lp=days.getLayoutParams();
+        lp.width= (int) (width*.15);
+        lp.height= (int) (height*.15);
+        days.setLayoutParams(lp);
+
+        lp=leftLinearLayout.getLayoutParams();
+        lp.width= (int) (width*.15);
+        lp.height= (int) (height*.47);
+        leftLinearLayout.setLayoutParams(lp);
+
+        lp=dataCountContainer.getLayoutParams();
+        lp.width= (int) (width*.85);
+        lp.height= (int) (height*.47);
+        dataCountContainer.setLayoutParams(lp);
+
+        lp=choice.getLayoutParams();
+        lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+        lp.height= (int) (height*.15);
+        choice.setLayoutParams(lp);
+
+        titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
+        rdb1.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
+        rdb2.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
+        rdb3.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
+
+        topLayoutParams = new LinearLayout.LayoutParams(300,300);
+        topLayoutParams.setMargins(10, 10, 0, 10);
+
+        leftLayoutParams = new LinearLayout.LayoutParams(300, 300);
+        leftLayoutParams.setMargins(0, 40 , 0, 0);
 
         dataCountParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 100);
-        dataCountParams.setMargins(10, 40, 10, 10);
+        dataCountParams.setMargins(0, 10, 0,0);
 
-        layoutParams = new LinearLayout.LayoutParams(200, 50);
-        layoutParams.setMargins(10, 10, 10, 10);
+        setPics();
 
+    }
+
+    void setPics(){
         pics = db.getDataPics("valid", "1",(day*meta.getNoOfQuestions())+","+meta.getNoOfQuestions());
-
-        for (int i = 1; i <=pics.length ; i++)//10 is no of images per day from db 3-10
+        for (int i = 1; i <= pics.length; i++)// no of images per day from db 3-10
         {
             final ImageView btn = new ImageView(this);
-
-
+            btn.setBackgroundResource(R.drawable.train_1);
+            topLinear.addView(btn, topLayoutParams);
+            lp=btn.getLayoutParams();
+            lp.width=(int) (width*.1);
+            lp.height=(int) (height*.14);
+            btn.setLayoutParams(lp);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 btn.setImageDrawable(getDrawable(getResources().getIdentifier(pics[i-1], "drawable", getPackageName())));
-
             } else {
                 btn.setImageDrawable(getResources().getDrawable(getResources().getIdentifier(pics[i-1], "drawable", getPackageName())));
             }
-            topLinearLayout.addView(btn, topLayoutParams);
         }
 
-
-        for (int i = 1; i <= db.getMaxAttemptsOfDay(day); i++)//attempts per day
+        for (int i = 1; i <=pics.length; i++)//attempts per day
         {
             final TextView btn = new TextView(this);
             btn.setText("ಪ್ರಯತ್ನ " + i);
-            btn.setTextSize(16);
-            btn.setGravity(5);
-            leftLinearLayout.addView(btn, leftLayoutParams);
+            leftLinear.addView(btn,leftLayoutParams);
+            lp=btn.getLayoutParams();
+            lp.width=(int) (width*.1);
+            lp.height=(int) (height*.1);
+            btn.setLayoutParams(lp);
 
             final LinearLayout layout=new LinearLayout(this);
             layout.setOrientation(LinearLayout.HORIZONTAL);
-            //layout.setBackgroundResource(R.drawable.circle_button);
-            for(int j=1;j<=pics.length;j++)
+            for(int j=1;j<=db.getMaxAttemptsOfDay(day);j++)
             {
                 final ImageView btn1=new ImageView(this);
-                btn1.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                int success=db.isTransactionSucess(pics[j-1],i);
-                switch (success){
-                    default:
-                        btn1.setImageResource(R.drawable.dash_small);break;
-                    case 0:
-                        btn1.setImageResource(R.drawable.untick_small);break;
-                    case 1:
-                        btn1.setImageResource(R.drawable.tick_small);break;
-                }
+                btn1.setBackgroundResource(R.drawable.train_1);
                 layout.addView(btn1, topLayoutParams);
+                lp=btn1.getLayoutParams();
+                lp.width=(int) (width*.1);
+                lp.height=(int) (height*.12);
+                btn1.setLayoutParams(lp);
             }
-            dataCountContainer.addView(layout,dataCountParams);
+            dataLinear.addView(layout,dataCountParams);
+            lp=layout.getLayoutParams();
+            lp.width=(int) (LinearLayout.LayoutParams.MATCH_PARENT);
+            lp.height=(int) (height*.15);
+            layout.setLayoutParams(lp);
         }
+
     }
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            int id=view.getId();
-            switch(id)
-            {
-                case R.id.leftScroll:verticalScroll.scrollTo(view.getScrollX(),view.getScrollY());
-                    break;
-                case R.id.verticalScroll:leftScroll.scrollTo(view.getScrollX(),view.getScrollY());
-                    break;
-                case R.id.topScroll:horzScroll.scrollTo(view.getScrollX(),view.getScrollY());
-                    break;
-                case R.id.horzScroll:topScroll.scrollTo(view.getScrollX(),view.getScrollY());
-                    break;
-            }
-            return false;
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        int id=view.getId();
+        switch(id)
+        {
+            case R.id.leftScroll:dataCountContainer.scrollTo(view.getScrollX(),view.getScrollY());
+                break;
+            case R.id.verticalScroll:leftLinearLayout.scrollTo(view.getScrollX(),view.getScrollY());
+                break;
+            case R.id.topScroll:horzScroll.scrollTo(view.getScrollX(),view.getScrollY());
+                break;
+            case R.id.horzScroll:topLinearLayout.scrollTo(view.getScrollX(),view.getScrollY());
+                break;
         }
+        return false;
+    }
 }

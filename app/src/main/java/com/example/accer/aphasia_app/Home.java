@@ -42,13 +42,13 @@ public class Home extends AppCompatActivity {
 
         ViewGroup.LayoutParams lp=btnProgress.getLayoutParams();
         lp.width= (int) (width*.30);
-        lp.height= (int) (height*.25);
+        lp.height= (int) (height*.30);
         btnProgress.setLayoutParams(lp);
 
 
         lp=btnTraining.getLayoutParams();
         lp.width= (int) (width*.30);
-        lp.height= (int) (height*.25);
+        lp.height= (int) (height*.35);
         btnTraining.setLayoutParams(lp);
 
        /* finish();
