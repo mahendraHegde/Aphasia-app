@@ -17,7 +17,8 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_toRightOf="@+id/days"
-        android:id="@+id/topScroll">
+        android:id="@+id/topScroll"
+        android:background="#00ff00">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -39,7 +40,7 @@
             android:orientation="vertical"
             android:background="#ff00ff"
             android:id="@+id/attempts"
-            android:padding="7dp">
+            android:padding="5dp">
 
         </LinearLayout>
     </ScrollView>
@@ -50,16 +51,16 @@
         android:id="@+id/verticalScroll"
         android:background="#ffff00"
         android:layout_below="@+id/topScroll"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
+        android:layout_toRightOf="@id/leftScroll">
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/horzScroll">
+            android:id="@+id/horzScroll"
+            android:padding="0dp"
+            android:layout_margin="0dp">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#ffff00"
                 android:orientation="vertical"
                 android:id="@+id/count">
             </LinearLayout>
@@ -70,12 +71,15 @@
         android:layout_width="match_parent"
         android:layout_height="75dp"
         android:layout_below="@+id/verticalScroll"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:gravity="bottom"
+        android:id="@+id/option">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/table_activity_question"
-            android:textSize="20dp"/>
+            android:textSize="20dp"
+            android:id="@+id/question"/>
 
         <Button
             android:layout_width="wrap_content"
