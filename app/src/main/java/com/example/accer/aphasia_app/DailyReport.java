@@ -160,10 +160,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         dataCountParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 100);
         dataCountParams.setMargins(0, 10, 0,0);
 
-<<<<<<< HEAD
         setPics();
-=======
->>>>>>> 5a7ec06f3245f4529e7eabdcad89bc0758a05f91
 
     }
 
