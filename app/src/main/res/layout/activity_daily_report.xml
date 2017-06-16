@@ -17,13 +17,15 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_toRightOf="@+id/days"
-        android:id="@+id/topScroll">
+        android:id="@+id/topScroll"
+        android:background="#fff">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:id="@+id/topImage"
-            android:padding="5dp">
+            android:padding="5dp"
+            android:background="#fff">
 
         </LinearLayout>
     </HorizontalScrollView>
@@ -50,7 +52,7 @@
         android:layout_below="@id/topScroll"
         android:layout_toRightOf="@id/leftScroll"
         android:id="@+id/verticalScroll"
-        android:background="#ffff00">
+        android:background="#fff">
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -79,7 +81,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/yes"
+            android:id="@+id/btn_yes"
             android:text="ಹೌದು"
             android:background="#0000ff"
             android:layout_marginRight="15dp"

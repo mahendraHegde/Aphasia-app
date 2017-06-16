@@ -45,11 +45,6 @@ public class Instructions extends AppCompatActivity {
     long rowCount=0;
     ADB db;
     ObjectAnimator anim=null;
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
     Meta meta;
     Calendar calendar;
     @Override
@@ -67,54 +62,46 @@ public class Instructions extends AppCompatActivity {
         if(meta.read()!=null){
             meta=meta.read();
         }
-
-
-        int last=meta.getLastDate().get(Calendar.DATE);
-        int tod=Calendar.getInstance().get(Calendar.DATE);
-
-        if(last!=tod&&meta.getLastDate().getTimeInMillis()<Calendar.getInstance().getTimeInMillis()){
-            meta.setDay(meta.getDay()+1);
-            meta.setTodayTrainingOver(false);
-            meta.setFailedPics(null);
-            meta.setDailyPicsOver(false);
-            meta.setFailedLooping(false);
-        }
-        meta.write();
-        if(meta.isTodayTrainingOver()){
-            new AlertDialog.Builder(this)
-                    .setTitle("over")
-                    .setPositiveButton(""+meta.isTodayTrainingOver(), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            finish();
-                            Intent intent = new Intent(Intent.ACTION_MAIN);
-                                intent.addCategory(Intent.CATEGORY_HOME);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                        }
-                    })
-                    .show();
-        }
-
-
-        spChoice.setVisibility(View.GONE);
-
-        int permission = ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-        }
         if(getIntent().getStringExtra("activity").contains("training"))
             training =true;
 
 
+        int last=meta.getLastDate().get(Calendar.DATE);
+        int tod=Calendar.getInstance().get(Calendar.DATE);
+        spChoice.setVisibility(View.GONE);
+
 
         if(training){
-            if(meta.getNoOfQuestions()==0)
+            if(meta.getNoOfQuestions()<=0)
                 spChoice.setVisibility(View.VISIBLE);
+
+            if(last!=tod&&meta.getLastDate().getTimeInMillis()<Calendar.getInstance().getTimeInMillis()){
+
+                meta.setTodayTrainingOver(false);
+                meta.setFailedPics(null);
+                meta.setDailyPicsOver(false);
+                meta.setFailedLooping(false);
+                if(!db.checkForYesterdayTest(meta.getDay()))
+                    meta.setDay(meta.getDay()+1);
+            }
+
+            meta.write();
+            if(meta.isTodayTrainingOver()){
+                new AlertDialog.Builder(this)
+                        .setTitle("ಪೂರ್ಣಗೊಂಡಿದೆ")
+                        .setMessage("ಇಂದಿನ ತರಬೇತಿ ಮುಗಿದಿದೆ. ನಾಳೆ ಮತ್ತೆ ಮರಳಿ ಬನ್ನಿ")
+                        .setPositiveButton(""+meta.isTodayTrainingOver(), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                finish();
+                                Intent intent = new Intent(getApplicationContext(),Home.class);
+                                startActivity(intent);
+                            }
+                        })
+                        .show();
+            }
+
+
 
             txtIns.setText(getResources().getString(R.string.training_ins));
             for(int i=3;i<=max;i++){
@@ -149,19 +136,10 @@ public class Instructions extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(training){
-                    if(meta.getNoOfQuestions()!=0) {
-                        int permission = ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                        if (permission != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(
-                                    Instructions.this,
-                                    PERMISSIONS_STORAGE,
-                                    REQUEST_EXTERNAL_STORAGE
-                            );
-                        }else {
+                    if(meta.getNoOfQuestions()>0) {
                             startActivity(new Intent(getApplicationContext(), training.class));
                             finish();
                         }
-                    }
                     else {
                         spChoice.setVisibility(View.VISIBLE);
                         anim=ObjectAnimator.ofPropertyValuesHolder(spChoice,
@@ -173,24 +151,13 @@ public class Instructions extends AppCompatActivity {
                         anim.start();
                     }
                 }else {
-                    startActivity(new Intent(getApplicationContext(), BaselineTest.class));
                     finish();
+                    startActivity(new Intent(getApplicationContext(), BaselineTest.class));
                 }
             }
         });
     }
 
-  /*  public static void setNoOfQuestions(String key, String value, Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(key, value);
-        editor.commit();
-    }
-
-    public static String getNoOfQuestions(String key, Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return preferences.getString(key, null);
-    }*/
 
     @Override
     protected void onDestroy() {

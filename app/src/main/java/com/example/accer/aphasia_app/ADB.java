@@ -2,6 +2,7 @@ package com.example.accer.aphasia_app;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteConstraintException;
@@ -41,13 +42,14 @@ public class ADB extends SQLiteOpenHelper {
         db.execSQL(createData);
 
         String createTransactions="create table  "+TABLE_TRANSACTIONS+" ( " +
+                "type INTEGER, "+
                 "attempt_id INTEGER, "+
                 "pic_id INTEGER ," +
                 "cue1 INTGER DEFAULT 0," +
                 "cue2 INTGER DEFAULT 0," +
                 "cue3 INTGER DEFAULT 0," +
                 "cue4 INTGER DEFAULT 0," +
-                "PRIMARY KEY (attempt_id,pic_id)"+
+                "PRIMARY KEY (type,attempt_id,pic_id)"+
                 ")";
        // db.execSQL("PRAGMA foreign_keys=ON");
         db.execSQL(createTransactions);
@@ -62,7 +64,7 @@ public class ADB extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public int[] getLastAttemptFromTransaction(String pic){
+    public int[] getLastAttemptFromTransaction(String pic,int type){
         SQLiteDatabase db=this.getReadableDatabase();
         int []arr=new int[2];
         Cursor cursor=db.query(TABLE_DATA,new String[] {"id"},"pic=?",new String[]{pic},null,null,null,null);
@@ -70,7 +72,7 @@ public class ADB extends SQLiteOpenHelper {
             arr[0]=Integer.parseInt(cursor.getString(0));
         else
             arr[0]=0;
-        Cursor c=db.query(TABLE_TRANSACTIONS,new String[]{"MAX(attempt_id)"},"pic_id=?",new String[]{cursor.getString(0)},null,null,null,null);
+        Cursor c=db.query(TABLE_TRANSACTIONS,new String[]{"MAX(attempt_id)"},"pic_id=? and type=?",new String[]{cursor.getString(0),""+type},null,null,null,null);
         if(c.moveToFirst()&&c.getString(0)!=null)
           arr[1]=Integer.parseInt(c.getString(0));
         else
@@ -78,9 +80,10 @@ public class ADB extends SQLiteOpenHelper {
         return arr;
     }
 
-    public void addTransaction(int attempt,int pic_id,int cue1,int cue2,int cue3,int cue4){
+    public void addTransaction(int type,int attempt,int pic_id,int cue1,int cue2,int cue3,int cue4){
         SQLiteDatabase db=this.getWritableDatabase();
         ContentValues values=new ContentValues();
+        values.put("type",type);
         values.put("attempt_id",attempt);
         values.put("pic_id",pic_id);
         values.put("cue1",cue1);
@@ -90,10 +93,9 @@ public class ADB extends SQLiteOpenHelper {
         try {
             db.insertOrThrow(TABLE_TRANSACTIONS,null,values);
         }catch (SQLiteConstraintException ex){
-            db.execSQL("update "+TABLE_TRANSACTIONS+" set cue1=cue1+"+cue1+ ",cue2=cue2+"+cue2+",cue3=cue3+"+cue3+",cue4=cue4+"+cue4+" where attempt_id="+attempt+" and pic_id="+pic_id);
+            db.execSQL("update "+TABLE_TRANSACTIONS+" set cue1=cue1+"+cue1+ ",cue2=cue2+"+cue2+",cue3=cue3+"+cue3+",cue4=cue4+"+cue4+" where type="+type+" and attempt_id="+attempt+" and pic_id="+pic_id);
         }finally {
             db.close();
-            SQLiteDatabase db1=this.getReadableDatabase();
 
         }
     }
@@ -102,16 +104,25 @@ public class ADB extends SQLiteOpenHelper {
         int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
         SQLiteDatabase db=this.getReadableDatabase();
         String limit=(day*noOfQuestions)+","+noOfQuestions;
-        //Toast.makeText(ctx,"limit="+limit,Toast.LENGTH_LONG).show();
-
-        //String []pics=getDataPics("valid","1",(day*noOfQuestions)+","+noOfQuestions);
-       Cursor cursor=db.rawQuery("select count(pic_id) from "+TABLE_TRANSACTIONS +" where cue4=? and attempt_id=? and pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") ",new String[]{"0","1","1"});
-        //Cursor cursor=db.rawQuery("select count(id) from "+TABLE_DATA+"  limit "+limit+"",null);
+       Cursor cursor=db.rawQuery("select count(pic_id) from "+TABLE_TRANSACTIONS +" where type=? and cue4=? and attempt_id=? and pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") ",new String[]{"0","0","1","1"});
         cursor.moveToFirst();
         return cursor.getInt(0);
 
     }
 
+    public boolean checkForYesterdayTest(int day){
+        int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
+        String limit=(day*noOfQuestions)+","+noOfQuestions;
+        SQLiteDatabase db=this.getReadableDatabase();
+        Cursor cursor=db.rawQuery("select count(*) from "+TABLE_TRANSACTIONS +" where  pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") ",new String[]{"1"});
+        if(cursor.moveToFirst()){
+            if(cursor.getInt(0)>0) {
+                return false;
+            }
+        }
+        return true;
+
+    }
 
     public void addData(String pic){
         SQLiteDatabase db=this.getWritableDatabase();
@@ -192,7 +203,6 @@ public class ADB extends SQLiteOpenHelper {
         SQLiteDatabase db=this.getReadableDatabase();
        // Toast.makeText(ctx,"limit : "+limit,Toast.LENGTH_SHORT).show();
         Cursor cursor=db.query(TABLE_DATA,new String[]{"pic"},field+"="+val,null,null,null,"id ASC",limit);
-
         String pics[]=new String[cursor.getCount()];
 
         if(cursor.moveToFirst()){
@@ -204,7 +214,32 @@ public class ADB extends SQLiteOpenHelper {
         return  pics;
     }
 
+    public int isTransactionSucess(String pic,int attempt){
+        int success=-1;
+        SQLiteDatabase db=this.getReadableDatabase();
+        Cursor cursor=db.query(TABLE_DATA,new String[]{"id"},"pic=?",new String[]{pic},null,null,null,null);
+        if(cursor.moveToFirst()){
+            //Toast.makeText(ctx,"id="+cursor.getString(0),Toast.LENGTH_LONG).show();
+            Cursor c=db.query(TABLE_TRANSACTIONS,new String[]{"cue4"},"pic_id=? and attempt_id=?",new String[]{cursor.getString(0),""+attempt},null,null,null,null);
+            if(c.moveToFirst()) {
+               // Toast.makeText(ctx,"cue4="+c.getString(0),Toast.LENGTH_LONG).show();
+                if (Integer.parseInt(c.getString(0)) <= 0)
+                    success = 1;
+                else success=0;
+            }
+        }
+        return success;
+    }
+    public int getMaxAttemptsOfDay(int day){
+        int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
+        SQLiteDatabase db=this.getReadableDatabase();
+        String limit=(day*noOfQuestions)+","+noOfQuestions;
+        Cursor cursor=db.rawQuery("select count(*) from "+TABLE_TRANSACTIONS +" where  pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") ",new String[]{"1"});
+        if(cursor.moveToFirst())
+            return cursor.getInt(0);
+        return 0;
 
+    }
 
     public void deleteData(int id){
         SQLiteDatabase db=this.getWritableDatabase();

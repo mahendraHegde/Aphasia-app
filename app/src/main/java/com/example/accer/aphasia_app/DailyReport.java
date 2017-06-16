@@ -1,5 +1,7 @@
-    package com.example.accer.aphasia_app;
+package com.example.accer.aphasia_app;
 
+import android.content.Intent;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -7,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -20,7 +23,15 @@ import android.widget.Toast;
 
         ScrollView leftScroll,verticalScroll;
         HorizontalScrollView topScroll,horzScroll;
+
+
+
         int day;
+        Meta meta;
+        String pics[]=null;
+        ADB db=null;
+        Button btnRetry;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +39,27 @@ import android.widget.Toast;
         setContentView(R.layout.activity_daily_report);
 
         day=getIntent().getIntExtra("day",0);
-        Toast.makeText(getApplicationContext(),""+day,Toast.LENGTH_LONG).show();
+        day--;
 
         leftScroll=(ScrollView)findViewById(R.id.leftScroll);
         verticalScroll=(ScrollView)findViewById(R.id.verticalScroll);
         topScroll=(HorizontalScrollView)findViewById(R.id.topScroll);
         horzScroll=(HorizontalScrollView)findViewById(R.id.horzScroll);
+        btnRetry=(Button)findViewById(R.id.btn_yes);
+
+        btnRetry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent in=new Intent(getApplicationContext(),Attempt.class);
+                in.putExtra("day",day+1);
+                startActivity(in);
+            }
+        });
+
+        db=new ADB(this);
+        meta=new Meta(this);
+        if(meta.read()!=null)
+            meta=meta.read();
 
         leftScroll.setOnTouchListener(this);
         verticalScroll.setOnTouchListener(this);
@@ -57,14 +83,24 @@ import android.widget.Toast;
         layoutParams = new LinearLayout.LayoutParams(200, 50);
         layoutParams.setMargins(10, 10, 10, 10);
 
-        for (int i = 1; i <= 10; i++)//10 is no of images per day from db 3-10
+        pics = db.getDataPics("valid", "1",(day*meta.getNoOfQuestions())+","+meta.getNoOfQuestions());
+
+        for (int i = 1; i <=pics.length ; i++)//10 is no of images per day from db 3-10
         {
             final ImageView btn = new ImageView(this);
-            btn.setBackgroundResource(R.drawable.train_1);
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                btn.setImageDrawable(getDrawable(getResources().getIdentifier(pics[i-1], "drawable", getPackageName())));
+
+            } else {
+                btn.setImageDrawable(getResources().getDrawable(getResources().getIdentifier(pics[i-1], "drawable", getPackageName())));
+            }
             topLinearLayout.addView(btn, topLayoutParams);
         }
 
-        for (int i = 1; i <= 10; i++)//attempts per day
+
+        for (int i = 1; i <= db.getMaxAttemptsOfDay(day); i++)//attempts per day
         {
             final TextView btn = new TextView(this);
             btn.setText("ಪ್ರಯತ್ನ " + i);
@@ -75,10 +111,19 @@ import android.widget.Toast;
             final LinearLayout layout=new LinearLayout(this);
             layout.setOrientation(LinearLayout.HORIZONTAL);
             //layout.setBackgroundResource(R.drawable.circle_button);
-            for(int j=1;j<=10;j++)
+            for(int j=1;j<=pics.length;j++)
             {
-                final Button btn1=new Button(this);
-                btn1.setBackgroundResource(R.drawable.train_1);
+                final ImageView btn1=new ImageView(this);
+                btn1.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                int success=db.isTransactionSucess(pics[j-1],i);
+                switch (success){
+                    default:
+                        btn1.setImageResource(R.drawable.dash_small);break;
+                    case 0:
+                        btn1.setImageResource(R.drawable.untick_small);break;
+                    case 1:
+                        btn1.setImageResource(R.drawable.tick_small);break;
+                }
                 layout.addView(btn1, topLayoutParams);
             }
             dataCountContainer.addView(layout,dataCountParams);

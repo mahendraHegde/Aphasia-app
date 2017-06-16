@@ -37,11 +37,11 @@
             android:screenOrientation="landscape" />
         <activity
             android:name=".Progress"
-
             android:configChanges="orientation|screenSize"
             android:exported="true"
-            android:screenOrientation="landscape"></activity>
-        <activity android:name=".Home"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".Home"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:screenOrientation="landscape">
@@ -49,7 +49,12 @@
             android:exported="true"
             android:screenOrientation="landscape">
         </activity>
-        <activity android:name=".DailyReport"
+        <activity
+            android:name=".DailyReport"
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="landscape" />
+        <activity android:name=".Attempt"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:screenOrientation="landscape"></activity>

@@ -5,14 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
-import java.nio.channels.spi.AbstractInterruptibleChannel;
 import java.util.Calendar;
 
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
@@ -36,10 +30,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setUp();
+        askPermission();
     }
 
-    void setUp(){
+    void dateMgmnt(){
         db=new ADB(this);
         c=Calendar.getInstance();
         meta=new Meta(this);
@@ -49,9 +43,6 @@ public class MainActivity extends AppCompatActivity {
                 db.addData("train_" + i);
             }
         }
-
-        // meta.deleteBackup();
-
 
 
         if(meta.read()!=null){
@@ -74,7 +65,11 @@ public class MainActivity extends AppCompatActivity {
                         }
                     })
                     .show();
-        }else {
+        }else{
+            startActivity(new Intent(this, Home.class));
+        }
+    }
+    void askPermission(){
 
             permission = ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
             if (permission!=PackageManager.PERMISSION_GRANTED){
@@ -85,10 +80,8 @@ public class MainActivity extends AppCompatActivity {
                         REQUEST_EXTERNAL_STORAGE
                 );
             }else {
-                startActivity(new Intent(this, BaselineTest.class));
+                dateMgmnt();
             }
-
-        }
     }
 
     @Override
@@ -114,23 +107,25 @@ public class MainActivity extends AppCompatActivity {
                                  }
                              })
                              .show();
-                 }else
-                     startActivity(new Intent(this, BaselineTest.class));
-                 break;
 
+                 }else
+                     dateMgmnt();
+                 break;
          }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        setUp();
+        if(ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED)
+            askPermission();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        setUp();
+        if(ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED)
+            askPermission();
 
     }
 

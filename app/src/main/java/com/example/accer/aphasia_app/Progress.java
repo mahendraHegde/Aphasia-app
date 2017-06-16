@@ -2,9 +2,12 @@ package com.example.accer.aphasia_app;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
@@ -26,6 +29,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.util.ArrayList;
+import java.util.jar.Attributes;
 
 public class Progress extends AppCompatActivity implements View.OnClickListener, OnChartValueSelectedListener {
 
@@ -97,7 +101,7 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
             invalid=0;
             if(i<=meta.getDay()) {
                 valid = db.getSuccessfulPicsCount(i);
-                invalid = meta.getNoOfQuestions() - valid;
+                invalid = db.getDataPics("valid","1",(i*meta.getNoOfQuestions())+","+meta.getNoOfQuestions()).length - valid;
             }
             float val1 = (float) valid;//successful
             float val2 = (float) invalid;//successful-unsuccessful
@@ -137,13 +141,20 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
             final Button btn = new Button(this);
             btn.setId(i);
             btn.setText("" + btn.getId());
-            if(i>meta.getDay()+1)
+            btn.setTextSize(TypedValue.COMPLEX_UNIT_SP,20);
+            btn.setTypeface(null, Typeface.BOLD);
+            if(i>meta.getDay()+1) {
                 btn.setEnabled(false);
-            btn.setBackgroundResource(R.drawable.circle_button);
+                btn.setBackgroundResource(R.drawable.circle_button);
+            }
+            else {
+                btn.setBackgroundResource(R.drawable.over_tick);
+            }
             linearLayout.addView(btn, layoutParams);
             btn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     Intent in=new Intent(getApplicationContext(),DailyReport.class);
+                    //Intent in=new Intent(getApplicationContext(),Attempt.class);
                     in.putExtra("day",btn.getId());
                     startActivity(in);
                 }

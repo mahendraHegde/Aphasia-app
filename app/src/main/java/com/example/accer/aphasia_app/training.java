@@ -44,7 +44,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     PowerManager pm;
     PowerManager.WakeLock wl;
     int position=-1;
-     int interval=2,savedCtr=1,maxGivenTime=25,ctr;
+     int interval=2,maxGivenTime=25,ctr;
     int threashold=0;
     static  MediaPlayer player;
     String pics[]=null;
@@ -59,6 +59,8 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     Button btnc1,btnc2,btnc3,btnc4;
     int cue1=0,cue2=0,cue3=0,cue4=0;
     Handler maxGivenTimeHandler=null;
+    ImageButton btnIns,btnHome;
+    int type=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +75,8 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         btnc2 = (Button) findViewById(R.id.btn_cue2);
         btnc3 = (Button) findViewById(R.id.btn_cue3);
         btnc4 = (Button) findViewById(R.id.btn_cue4);
+        btnHome=(ImageButton)findViewById(R.id.btn_home);
+        btnIns=(ImageButton)findViewById(R.id.btn_instructions);
         meta=new Meta(this);
         todayDate=Calendar.getInstance();
         failedPicsArralist=new ArrayList<String>();
@@ -89,6 +93,8 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         btnc2.setOnClickListener(this);
         btnc3.setOnClickListener(this);
         btnc4.setOnClickListener(this);
+        btnIns.setOnClickListener(this);
+        btnHome.setOnClickListener(this);
 
         if(meta.read()!=null){
             meta=meta.read();
@@ -114,10 +120,10 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         if(meta.isTodayTrainingOver()){
             finish();
         }
+        if(meta.isFailedLooping())
+            type=1;
         lastDate=meta.getLastDate();
-        //Toast.makeText(getApplicationContext(),"1",Toast.LENGTH_SHORT).show();
         setImg();
-        //Toast.makeText(getApplicationContext(),"2",Toast.LENGTH_SHORT).show();
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -165,6 +171,19 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         lp.height = (int) (height * .25 * .65);
         btnc4.setLayoutParams(lp);
         btnc4.setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) (width * .35 * .085));
+
+
+        lp=btnHome.getLayoutParams();
+        lp.width = (int) (width * .16 * .45);
+        lp.height = (int) (height * .16 * .65);
+        btnHome.setLayoutParams(lp);
+
+        lp=btnIns.getLayoutParams();
+        lp.width = (int) (width * .12 * .45);
+        lp.height = (int) (height * .12 * .65);
+        btnIns.setLayoutParams(lp);
+
+
 
 
         new Handler().postDelayed(new Runnable() {
@@ -229,6 +248,32 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                   stopPlayer();
                   player = MediaPlayer.create(getApplicationContext(), getResources().getIdentifier(img.getTag() + "_" + ctr, "raw", getPackageName()));
                   player.start();
+                  switch (ctr){
+                      case 1:
+                          btnc1.setEnabled(true);
+                          btnc2.setEnabled(false);
+                          btnc3.setEnabled(false);
+                          btnc4.setEnabled(false);
+                          break;
+                      case 2:
+                          btnc1.setEnabled(false);
+                          btnc2.setEnabled(true);
+                          btnc3.setEnabled(false);
+                          btnc4.setEnabled(false);
+                          break;
+                      case 3:
+                          btnc1.setEnabled(false);
+                          btnc2.setEnabled(false);
+                          btnc3.setEnabled(true);
+                          btnc4.setEnabled(false);
+                          break;
+                      case 4:
+                          btnc1.setEnabled(false);
+                          btnc2.setEnabled(false);
+                          btnc3.setEnabled(false);
+                          btnc4.setEnabled(true);
+                          break;
+                  }
                   player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                       @Override
                       public void onCompletion(MediaPlayer mediaPlayer) {
@@ -261,14 +306,14 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                                   cue4=1;
                                   break;
                           }
-                          db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],cue1,cue2,cue3,cue4);
+                          db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],cue1,cue2,cue3,cue4);
                       }
                   });
                   ctr++;
                   if (ctr <4)
                       handler.postDelayed(this, (interval * 1000)+player.getDuration());
                  else if(ctr==4) {
-                      handler.postDelayed(this, (1000 * 2/*30*/)+player.getDuration());
+                      handler.postDelayed(this, (1000 * 10/*30*/)+player.getDuration());//after 3rd cue gets over
                       new Handler().postDelayed(new Runnable() {
                           @Override
                           public void run() {
@@ -276,13 +321,13 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                                   btnc2.setEnabled(true);
                                   btnc3.setEnabled(true);
                           }
-                      },10000);
-                      new Handler().postDelayed(new Runnable() {
+                      },10*1000);
+/*                      new Handler().postDelayed(new Runnable() {
                           @Override
                           public void run() {
                               btnc4.setEnabled(true);
                           }
-                      },1000*30);
+                      },1000*30);*/
 
                   }
                   else if(position<=threashold-1) {
@@ -336,8 +381,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                         meta.setFailedPics(failedPicsArralist.toArray(new String[failedPicsArralist.size()]));
                         meta.write();
                 }
-
-                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,0,0,0);
+                 db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,0,0);
                 stopPlayer();
                 player=MediaPlayer.create(this,R.raw.tick_sound);
                 player.start();
@@ -347,30 +391,40 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                 }
                 break;
             case R.id.btn_cue1 :
-                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],1,0,0,0);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],1,0,0,0);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_1","raw",getPackageName()));
                 player.start();
                 break;
 
             case R.id.btn_cue2 :
-                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,1,0,0);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,1,0,0);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_2","raw",getPackageName()));
                 player.start();
 
                 break;
             case R.id.btn_cue3 :
-                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,0,1,0);
-                stopPlayer();
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,1,0);
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_3","raw",getPackageName()));
                 player.start();
                 break;
             case R.id.btn_cue4 :
-                db.addTransaction(picAttemptArray[1]+1,picAttemptArray[0],0,0,0,1);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,0,1);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_4","raw",getPackageName()));
                 player.start();
+                break;
+
+            case R.id.btn_home:
+                finish();
+                startActivity(new Intent(this,Home.class));
+                break;
+            case R.id.btn_instructions:
+                finish();
+                Intent in=new Intent(getApplicationContext(),Instructions.class);
+                in.putExtra("activity","training");
+                startActivity(in);
                 break;
         }
     }
@@ -380,11 +434,10 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     void setImg(){
         position++;
         if(position<threashold&&position<pics.length&&position>-1) {
-            picAttemptArray=db.getLastAttemptFromTransaction(pics[position]);
+            picAttemptArray=db.getLastAttemptFromTransaction(pics[position],type);
             r1.startAnimation(AnimationUtils.loadAnimation (getApplicationContext(),R.anim.fromright));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 img.setImageDrawable(getDrawable(getResources().getIdentifier(pics[position], "drawable", getPackageName())));
-
             } else {
                 img.setImageDrawable(getResources().getDrawable(getResources().getIdentifier(pics[position], "drawable", getPackageName())));
             }
@@ -410,6 +463,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                     pics=failedPicsArralist.toArray(pics);
                     failedPicsArralist=new ArrayList<>();
                     meta.setFailedLooping(true);
+                    type=1;
                     meta.write();
                     threashold =pics.length;
                     setImg();
@@ -434,9 +488,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                 handler.removeCallbacksAndMessages(null);
             }
             finish();
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_HOME);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent intent = new Intent(this,Home.class);
             startActivity(intent);
             return;
         }
@@ -464,9 +516,9 @@ public class training extends AppCompatActivity implements View.OnClickListener{
             handler.removeCallbacksAndMessages(null);
         }
 
-        todayDate=Calendar.getInstance();
+        todayDate=Calendar.getInstance();/*
         int last=lastDate.get(Calendar.DATE);
-        int tod=todayDate.get(Calendar.DATE);
+        int tod=todayDate.get(Calendar.DATE);*/
 
         stopPlayer();
         meta.setTrainingPosition(position-1);
