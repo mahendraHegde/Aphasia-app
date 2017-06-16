@@ -44,6 +44,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
     ViewGroup.LayoutParams lp;
     int width,height;
     int type=-1;
+    boolean isLastRowValid=true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -196,8 +197,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
                 btn.setImageDrawable(getResources().getDrawable(getResources().getIdentifier(pics[i-1], "drawable", getPackageName())));
             }
         }
-
-        for (int i = 1; i <= 10; i++)//attempts per day
+        for (int i = 1; i <=db.getMaxAttemptsOfDay(day,type); i++)//attempts per day
         {
             final TextView btn = new TextView(this);
             btn.setText("ಪ್ರಯತ್ನ " + i);
@@ -211,21 +211,38 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
 
             final LinearLayout layout=new LinearLayout(this);
             layout.setOrientation(LinearLayout.HORIZONTAL);
-            for(int j=1;j<=10;j++)
+            for(int j=1;j<=pics.length;j++)
             {
                 final ImageView btn1=new ImageView(this);
-                btn1.setBackgroundResource(R.drawable.train_1);
+                switch (db.isTransactionSuccessFull(i,pics[j-1],type)){
+                    case 0:
+                        isLastRowValid=true;
+                        btn1.setBackgroundResource(R.drawable.tick_small);
+                        break;
+                    case 1:
+                        isLastRowValid=true;
+                        btn1.setBackgroundResource(R.drawable.untick_small);
+                        break;
+                    default:
+                        isLastRowValid=false;
+                        btn1.setBackgroundResource(R.drawable.dash_small);
+                        break;
+
+
+                }
                 layout.addView(btn1, topLayoutParams);
                 lp=btn1.getLayoutParams();
                 lp.width=(int) (width*.1);
                 lp.height=(int) (height*.12);
                 btn1.setLayoutParams(lp);
             }
-            dataLinear.addView(layout,dataCountParams);
-            lp=layout.getLayoutParams();
-            lp.width=(int) (LinearLayout.LayoutParams.MATCH_PARENT);
-            lp.height=(int) (height*.15);
-            layout.setLayoutParams(lp);
+
+                dataLinear.addView(layout, dataCountParams);
+                lp = layout.getLayoutParams();
+                lp.width = (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+                lp.height = (int) (height * .15);
+                layout.setLayoutParams(lp);
+           // Toast.makeText(getApplicationContext(),""+i,Toast.LENGTH_LONG).show();
         }
 
 

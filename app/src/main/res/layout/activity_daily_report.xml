@@ -30,12 +30,12 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ಮೊದಲ ಫಲಿತಾಂಶ"
+            android:text="ವಿಫಲವಾದ ಫಲಿತಾಂಶ"
             android:id="@+id/rdb2" />
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ಇತರ ಫಲಿತಾಂಶಗಳು"
+            android:text="ಮರುಪ್ರಯತ್ನಿಸಿದ ಫಲಿತಾಂಶಗಳು"
             android:id="@+id/rdb3" />
     </RadioGroup>
     <TextView
