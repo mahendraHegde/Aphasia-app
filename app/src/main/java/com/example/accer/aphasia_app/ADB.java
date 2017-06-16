@@ -8,6 +8,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.design.widget.TabLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -214,21 +215,25 @@ public class ADB extends SQLiteOpenHelper {
         return  pics;
     }
 
-    public int isTransactionSucess(String pic,int attempt){
-        int success=-1;
+    public String[][] getTransactionForReport(int day,int type){
+        int i=0,j=0;
+        String arr[][]=null;
+        Cursor cursor;
+        int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
         SQLiteDatabase db=this.getReadableDatabase();
-        Cursor cursor=db.query(TABLE_DATA,new String[]{"id"},"pic=?",new String[]{pic},null,null,null,null);
+        String limit=(day*noOfQuestions)+","+noOfQuestions;
+        if(type>=0&&type<=2){
+            cursor=db.rawQuery("select pic,cue4 from "+TABLE_TRANSACTIONS +" inner join "+TABLE_DATA+" on "+TABLE_DATA+".id="+TABLE_TRANSACTIONS+".pic_id where type=?  and pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") order by pic_id ASC ",new String[]{""+type,"1"});
+        }else
+            cursor=db.rawQuery("select pic,cue4 from "+TABLE_TRANSACTIONS +" inner join "+TABLE_DATA+" on "+TABLE_DATA+".id="+TABLE_TRANSACTIONS+".pic_id where pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") order by pic_id ASC ",new String[]{"1"});
         if(cursor.moveToFirst()){
-            //Toast.makeText(ctx,"id="+cursor.getString(0),Toast.LENGTH_LONG).show();
-            Cursor c=db.query(TABLE_TRANSACTIONS,new String[]{"cue4"},"pic_id=? and attempt_id=?",new String[]{cursor.getString(0),""+attempt},null,null,null,null);
-            if(c.moveToFirst()) {
-               // Toast.makeText(ctx,"cue4="+c.getString(0),Toast.LENGTH_LONG).show();
-                if (Integer.parseInt(c.getString(0)) <= 0)
-                    success = 1;
-                else success=0;
-            }
+            arr=new String[cursor.getCount()][cursor.getCount()];
+            do{
+                arr[i][0]=cursor.getString(0);
+                arr[i++][1]=cursor.getString(1);
+            }while (cursor.moveToNext());
         }
-        return success;
+        return arr;
     }
     public int getMaxAttemptsOfDay(int day){
         int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
