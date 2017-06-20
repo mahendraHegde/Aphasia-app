@@ -27,6 +27,8 @@ import android.widget.Toast;
 public class DailyReport extends AppCompatActivity implements View.OnTouchListener {
 
     TextView titleText,days;
+    RadioGroup options;
+    RadioButton rdb1,rdb2,rdb3;
     HorizontalScrollView topLinearLayout,horzScroll;
     ScrollView leftLinearLayout,dataCountContainer;
     LinearLayout.LayoutParams topLayoutParams,leftLayoutParams,dataCountParams,layoutParams;
@@ -41,7 +43,8 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
     Button btnRetry;
     ViewGroup.LayoutParams lp;
     int width,height;
-    int lastRowValidCount=0;
+    int type=-1;
+    int lastRowValidCount=0,tryCount=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +61,10 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
 
         titleText=(TextView)findViewById(R.id.titleText);
         days=(TextView)findViewById(R.id.days);
+        options=(RadioGroup)findViewById(R.id.options);
+        rdb1=(RadioButton)findViewById(R.id.rdb1);
+        rdb2=(RadioButton)findViewById(R.id.rdb2);
+        rdb3=(RadioButton)findViewById(R.id.rdb3);
         topLinearLayout=(HorizontalScrollView) findViewById(R.id.topScroll);
         leftLinearLayout=(ScrollView) findViewById(R.id.leftScroll);
         dataCountContainer=(ScrollView)findViewById(R.id.verticalScroll);
@@ -67,6 +74,28 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         leftLinear=(LinearLayout)findViewById(R.id.attempts);
         dataLinear=(LinearLayout)findViewById(R.id.count);
         btnRetry=(Button)findViewById(R.id.btn_yes);
+
+        rdb1.setChecked(true);
+
+        options.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, @IdRes int i) {
+                switch (i){
+                    case R.id.rdb1 :
+                        type=-1;
+                        setPics();
+                        break;
+                    case R.id.rdb2 :
+                        type=1;
+                        setPics();
+                        break;
+                    case R.id.rdb3 :
+                        type=2;
+                        setPics();
+                        break;
+                }
+            }
+        });
 
 
         btnRetry.setOnClickListener(new View.OnClickListener() {
@@ -95,6 +124,16 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         lp.height= (int) (height*.1);
         titleText.setLayoutParams(lp);
 
+        lp=options.getLayoutParams();
+        lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+        lp.height= (int) (height*.1);
+        options.setLayoutParams(lp);
+
+        lp=options.getLayoutParams();
+        lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+        lp.height= (int) (height*.1);
+        options.setLayoutParams(lp);
+
         lp=topLinearLayout.getLayoutParams();
         lp.width= (int) (width*.85);
         lp.height= (int) (height*.15);
@@ -122,6 +161,9 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
 
         titleText.setText("ದೈನಂದಿನ ವರದಿ : ದಿನ "+(day+1));
         titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
+        rdb1.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
+        rdb2.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
+        rdb3.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
 
         topLayoutParams = new LinearLayout.LayoutParams(300,300);
         topLayoutParams.setMargins(10, 10, 0, 10);
@@ -156,11 +198,11 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
                 btn.setImageDrawable(getResources().getDrawable(getResources().getIdentifier(pics[i-1], "drawable", getPackageName())));
             }
         }
-        for (int i = 1; i <=db.getMaxAttemptsOfDay(day); i++)//attempts per day
+        for (int i = 1,tryCount=1; i <=db.getMaxAttemptsOfDay(day,type); i++)//attempts per day
         {
             lastRowValidCount=0;
             final TextView btn = new TextView(this);
-            btn.setText("ಪ್ರಯತ್ನ " + i);
+            btn.setText("ಪ್ರಯತ್ನ " + tryCount);
             //btn.setGravity(5);
             //btn.setTextSize(TypedValue.COMPLEX_UNIT_SP,18);
 
@@ -170,7 +212,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
             for(int j=1;j<=pics.length;j++)
             {
                 final ImageView btn1=new ImageView(this);
-                switch (db.isTransactionSuccessFull(i,pics[j-1])){
+                switch (db.isTransactionSuccessFull(i,pics[j-1],type)){
                     case 0:
                         btn1.setBackgroundResource(R.drawable.tick_small);
                         break;
@@ -189,6 +231,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
                 btn1.setLayoutParams(lp);
             }
             if(lastRowValidCount<pics.length){
+                tryCount++;
                 leftLinear.addView(btn,leftLayoutParams);
                 lp=btn.getLayoutParams();
                 lp.width=(int) (width*.1);
