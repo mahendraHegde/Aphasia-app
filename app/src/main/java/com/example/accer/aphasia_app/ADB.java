@@ -218,7 +218,7 @@ public class ADB extends SQLiteOpenHelper {
     public int isTransactionSuccessFull(int attempt,String pic,int type){
         Cursor cursor=null;
         SQLiteDatabase db=this.getReadableDatabase();
-        if(type>0&&type<=2){
+        if(type>=0&&type<=2){
             cursor=db.rawQuery("select cue4 from "+TABLE_TRANSACTIONS +" where attempt_id=? and type=?  and  pic_id in(select id from "+TABLE_DATA+" where pic=?) ",new String[]{""+attempt,""+type,pic});
         }else
             cursor=db.rawQuery("select cue4 from "+TABLE_TRANSACTIONS +" where attempt_id=?  and  pic_id in(select id from "+TABLE_DATA+" where pic=?) ",new String[]{""+attempt,pic});

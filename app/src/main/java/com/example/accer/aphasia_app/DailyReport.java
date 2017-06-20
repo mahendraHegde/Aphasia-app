@@ -26,9 +26,9 @@ import android.widget.Toast;
 
 public class DailyReport extends AppCompatActivity implements View.OnTouchListener {
 
-    TextView titleText,days;
+    TextView titleText,days,question;
     RadioGroup options;
-    RadioButton rdb1,rdb2,rdb3;
+    RadioButton rdb1,rdb2;
     HorizontalScrollView topLinearLayout,horzScroll;
     ScrollView leftLinearLayout,dataCountContainer;
     LinearLayout.LayoutParams topLayoutParams,leftLayoutParams,dataCountParams,layoutParams;
@@ -63,8 +63,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         days=(TextView)findViewById(R.id.days);
         options=(RadioGroup)findViewById(R.id.options);
         rdb1=(RadioButton)findViewById(R.id.rdb1);
-        rdb2=(RadioButton)findViewById(R.id.rdb2);
-        rdb3=(RadioButton)findViewById(R.id.rdb3);
+        rdb2=(RadioButton)findViewById(R.id.rdb3);
         topLinearLayout=(HorizontalScrollView) findViewById(R.id.topScroll);
         leftLinearLayout=(ScrollView) findViewById(R.id.leftScroll);
         dataCountContainer=(ScrollView)findViewById(R.id.verticalScroll);
@@ -74,6 +73,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         leftLinear=(LinearLayout)findViewById(R.id.attempts);
         dataLinear=(LinearLayout)findViewById(R.id.count);
         btnRetry=(Button)findViewById(R.id.btn_yes);
+        btnRetry.setTextSize(TypedValue.COMPLEX_UNIT_PX,height/20);
 
         rdb1.setChecked(true);
 
@@ -83,10 +83,6 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
                 switch (i){
                     case R.id.rdb1 :
                         type=-1;
-                        setPics();
-                        break;
-                    case R.id.rdb2 :
-                        type=1;
                         setPics();
                         break;
                     case R.id.rdb3 :
@@ -101,7 +97,6 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         btnRetry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
                 Intent in=new Intent(getApplicationContext(),Attempt.class);
                 in.putExtra("day",day+1);
                 startActivity(in);
@@ -123,11 +118,9 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
         lp.height= (int) (height*.1);
         titleText.setLayoutParams(lp);
-
-        lp=options.getLayoutParams();
-        lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.height= (int) (height*.1);
-        options.setLayoutParams(lp);
+        titleText.setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) (height/16));
+        rdb1.setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) (height/17));
+        rdb2.setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) (height/17));
 
         lp=options.getLayoutParams();
         lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
@@ -143,6 +136,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         lp.width= (int) (width*.15);
         lp.height= (int) (height*.15);
         days.setLayoutParams(lp);
+        days.setTextSize(TypedValue.COMPLEX_UNIT_PX,height/20);
 
         lp=leftLinearLayout.getLayoutParams();
         lp.width= (int) (width*.15);
@@ -159,17 +153,20 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         lp.height= (int) (height*.15);
         choice.setLayoutParams(lp);
 
+        question=(TextView)findViewById(R.id.question);
+        lp=choice.getLayoutParams();
+        lp.width= (int) (LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.height= (int) (height*.15);
+        choice.setLayoutParams(lp);
+        question.setTextSize(TypedValue.COMPLEX_UNIT_PX,height/21);
+
         titleText.setText("ದೈನಂದಿನ ವರದಿ : ದಿನ "+(day+1));
-        titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
-        rdb1.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
-        rdb2.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
-        rdb3.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
 
         topLayoutParams = new LinearLayout.LayoutParams(300,300);
         topLayoutParams.setMargins(10, 10, 0, 10);
 
         leftLayoutParams = new LinearLayout.LayoutParams(300, 300);
-        leftLayoutParams.setMargins(0, 40 , 0, 0);
+        leftLayoutParams.setMargins(0, 40 , 0, 20);
 
         dataCountParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 100);
         dataCountParams.setMargins(0, 10, 0,0);
@@ -203,9 +200,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
             lastRowValidCount=0;
             final TextView btn = new TextView(this);
             btn.setText("ಪ್ರಯತ್ನ " + tryCount);
-            //btn.setGravity(5);
-            //btn.setTextSize(TypedValue.COMPLEX_UNIT_SP,18);
-
+            btn.setTextSize(TypedValue.COMPLEX_UNIT_PX,height/25);
 
             final LinearLayout layout=new LinearLayout(this);
             layout.setOrientation(LinearLayout.HORIZONTAL);
@@ -262,5 +257,11 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
                 break;
         }
         return false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        onStart();
     }
 }

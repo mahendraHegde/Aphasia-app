@@ -6,12 +6,18 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -34,14 +40,17 @@ import java.util.jar.Attributes;
 public class Progress extends AppCompatActivity implements View.OnClickListener, OnChartValueSelectedListener {
 
     LinearLayout linearLayout;
-    LinearLayout.LayoutParams layoutParams;
+    RelativeLayout topScrollButton;
+    LinearLayout.LayoutParams layoutParams,topScrollParams;
     HorizontalScrollView horizontalScrollView;
+    ViewGroup.LayoutParams lp;
     Button rightbtn, leftbtn;
     int i;
     private BarChart mChart;
     int valid,invalid;
     Meta meta;
     ADB db;
+    HorizontalScrollView container;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +79,8 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
 
         mChart.setDrawValueAboveBar(false);
         mChart.setHighlightFullBarEnabled(false);
+        mChart.getXAxis().setTextSize(20f);
+        mChart.getAxisLeft().setTextSize(15f);
 
         // change the position of the y-labels
         YAxis leftAxis = mChart.getAxisLeft();
@@ -82,7 +93,7 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
         final ArrayList<String> theDays=new ArrayList<>();
         for(int i=1;i<=30;i++)
         {
-            theDays.add("Day"+i);
+            theDays.add("ದಿನ"+i);
         }
 
         Legend l = mChart.getLegend();
@@ -135,6 +146,13 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
         rightbtn.setOnClickListener(this);
         leftbtn.setOnClickListener(this);
 
+        //added
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        //added
+
         layoutParams = new LinearLayout.LayoutParams(125, 125);
         layoutParams.setMargins(10, 10, 10, 10);
         for (i = 1; i <= 30; i++) {
@@ -151,6 +169,11 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
                 btn.setBackgroundResource(R.drawable.over_tick);
             }
             linearLayout.addView(btn, layoutParams);
+            lp=btn.getLayoutParams();
+            lp.width= (int) (width*.08);
+            lp.height= (int) (height*.13);
+            btn.setLayoutParams(lp);
+
             btn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     Intent in=new Intent(getApplicationContext(),DailyReport.class);
@@ -160,6 +183,52 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
                 }
             });
         }
+        //i edited
+
+        TextView t = (TextView)findViewById(R.id.textview);
+        lp=t.getLayoutParams();
+        lp.width= (int) (width*.05);
+        lp.height= (int) (height*.58);
+        t.setLayoutParams(lp);
+        t.setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) (height/16));
+
+        TextView t1=(TextView)findViewById(R.id.textview12);
+        t1.setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) (height/16));
+
+
+        topScrollButton=(RelativeLayout)findViewById(R.id.topScrollButtons);
+        lp=topScrollButton.getLayoutParams();
+        lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+        lp.height= (int) (height*.15);
+        topScrollButton.setLayoutParams(lp);
+
+        lp=rightbtn.getLayoutParams();
+        lp.width= (int) (width*.09);
+        lp.height= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+        rightbtn.setLayoutParams(lp);
+
+        lp=leftbtn.getLayoutParams();
+        lp.width= (int) (width*.09);
+        lp.height= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+        leftbtn.setLayoutParams(lp);
+
+        container=(HorizontalScrollView)findViewById(R.id.scroller);
+        lp=container.getLayoutParams();
+        lp.width= (int) (width*.82);
+        lp.height= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
+        container.setLayoutParams(lp);
+
+        lp=mChart.getLayoutParams();
+        lp.width= (int) (width*0.9);
+        lp.height= (int) (height*.58);
+        mChart.setLayoutParams(lp);
+
+        /*lp=t.getLayoutParams();
+        lp.width= (int) (height*.65);
+        lp.height= (int) (width*.1);
+        t.setLayoutParams(lp);*/
+
+        //ends
     }
 
     @Override
