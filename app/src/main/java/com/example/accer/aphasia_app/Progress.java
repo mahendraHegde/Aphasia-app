@@ -123,10 +123,11 @@ public class Progress extends AppCompatActivity implements View.OnClickListener,
         }        BarDataSet set1;
         mChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(theDays));
 
-        set1 = new BarDataSet(yVals1, ":  Monthly Report");
+        set1 = new BarDataSet(yVals1, ":  ಮಾಸಿಕ ವರದಿ");
         set1.setDrawIcons(false);
         set1.setColors(getColors());
-        set1.setStackLabels(new String[]{"Successful", "Unsuccessful"});
+        set1.setStackLabels(new String[]{"ಯಶಸ್ವಿ", "ವಿಫಲವಾಗಿದೆ"});
+        set1.setValueTextSize(10);
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<IBarDataSet>();
         dataSets.add(set1);

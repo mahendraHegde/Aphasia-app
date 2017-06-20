@@ -41,8 +41,6 @@ public class Instructions extends AppCompatActivity {
     final int max=10;
     List<String> list;
     ArrayAdapter<String> adapter;
-    public static  String QUESTIONS_KEY="questions";
-    long rowCount=0;
     ADB db;
     ObjectAnimator anim=null;
     Meta meta;
@@ -90,7 +88,7 @@ public class Instructions extends AppCompatActivity {
                 new AlertDialog.Builder(this)
                         .setTitle("ಪೂರ್ಣಗೊಂಡಿದೆ")
                         .setMessage("ಇಂದಿನ ತರಬೇತಿ ಮುಗಿದಿದೆ. ನಾಳೆ ಮತ್ತೆ ಮರಳಿ ಬನ್ನಿ")
-                        .setPositiveButton(""+meta.isTodayTrainingOver(), new DialogInterface.OnClickListener() {
+                        .setPositiveButton("ಸರಿ", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 finish();

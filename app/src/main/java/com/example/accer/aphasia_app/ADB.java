@@ -102,12 +102,17 @@ public class ADB extends SQLiteOpenHelper {
     }
 
     public  int getSuccessfulPicsCount(int day){
-        int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
-        SQLiteDatabase db=this.getReadableDatabase();
-        String limit=(day*noOfQuestions)+","+noOfQuestions;
-       Cursor cursor=db.rawQuery("select count(pic_id) from "+TABLE_TRANSACTIONS +" where type=? and cue4=? and attempt_id=? and pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") ",new String[]{"0","0","1","1"});
-        cursor.moveToFirst();
-        return cursor.getInt(0);
+        try {
+            int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
+            SQLiteDatabase db=this.getReadableDatabase();
+            String limit=(day*noOfQuestions)+","+noOfQuestions;
+            Cursor cursor=db.rawQuery("select count(pic_id) from "+TABLE_TRANSACTIONS +" where type=? and cue4=? and attempt_id=? and pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") ",new String[]{"0","0","1","1"});
+            cursor.moveToFirst();
+            return cursor.getInt(0);
+        }catch (Exception e){
+            Toast.makeText(ctx,"Training has not started yet..",Toast.LENGTH_LONG).show();
+        }
+       return 0;
 
     }
 

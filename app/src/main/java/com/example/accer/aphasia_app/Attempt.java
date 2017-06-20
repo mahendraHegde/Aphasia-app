@@ -54,7 +54,8 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
     Runnable handlerRunnable=null;
     boolean doubleBackToExitPressedOnce=false;
     Meta meta;
-    Calendar todayDate,lastDate;
+    Calendar todayDate;
+    ImageButton btnHome;
 
     Button btnc1,btnc2,btnc3,btnc4;
     int cue1=0,cue2=0,cue3=0,cue4=0;
@@ -64,7 +65,7 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_training);
+        setContentView(R.layout.activity_attempt);
         r1 = (RelativeLayout) findViewById(R.id.relative_image);
         r2 = (ConstraintLayout) findViewById(R.id.relative_cue);
         r3 = (RelativeLayout) findViewById(R.id.relative_check);
@@ -78,6 +79,7 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
         todayDate=Calendar.getInstance();
         failedPicsArralist=new ArrayList<String>();
         db = new ADB(this);
+        btnHome=(ImageButton)findViewById(R.id.btn_home);
 
 
         handler = new Handler();
@@ -144,6 +146,20 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
         lp.height = (int) (height * .25 * .65);
         btnc4.setLayoutParams(lp);
         btnc4.setTextSize(TypedValue.COMPLEX_UNIT_PX, (float) (width * .35 * .085));
+
+        lp=btnHome.getLayoutParams();
+        lp.width = (int) (width * .16 * .45);
+        lp.height = (int) (height * .16 * .65);
+        btnHome.setLayoutParams(lp);
+
+
+        btnHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+                startActivity(new Intent(getApplicationContext(),Home.class));
+            }
+        });
 
 
         new Handler().postDelayed(new Runnable() {

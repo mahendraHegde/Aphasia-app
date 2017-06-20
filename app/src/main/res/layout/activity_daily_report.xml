@@ -12,15 +12,15 @@
         android:id="@+id/titleText"
         android:text="ದೈನಂದಿನ ವರದಿ : ದಿನ"
         android:gravity="center"
-        android:textStyle="bold"
-        android:background="#ffff00" />
+        android:background="@drawable/gradient"
+        android:textStyle="bold" />
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:background="#00ff00"
         android:id="@+id/options"
+        android:background="@drawable/gradient"
         android:layout_below="@+id/titleText">
         <RadioButton
             android:layout_width="wrap_content"
@@ -103,15 +103,14 @@
         android:layout_height="75dp"
         android:layout_below="@+id/verticalScroll"
         android:gravity="center"
-        android:background="#f1f1f1"
-        android:padding="3dp"
+        android:background="@drawable/gradient"
         android:id="@+id/choice">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/table_activity_question"
             android:textSize="20dp"
-            android:gravity="center"
+            android:gravity=""
             android:id="@+id/question"/>
 
         <Button
@@ -119,8 +118,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/btn_yes"
             android:text="ಹೌದು"
-            android:padding="5dp"
-            android:background="#0000ff"
+            android:background="@drawable/circle_button"
             android:layout_marginRight="15dp"
             android:layout_alignParentRight="true"/>
 

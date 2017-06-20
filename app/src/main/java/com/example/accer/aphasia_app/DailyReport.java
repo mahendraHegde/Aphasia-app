@@ -24,6 +24,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
+
 public class DailyReport extends AppCompatActivity implements View.OnTouchListener {
 
     TextView titleText,days,question;
@@ -44,7 +46,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
     ViewGroup.LayoutParams lp;
     int width,height;
     int type=-1;
-    int lastRowValidCount=0,tryCount=0;
+    int lastRowValidCount=0,tryCount;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +75,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         leftLinear=(LinearLayout)findViewById(R.id.attempts);
         dataLinear=(LinearLayout)findViewById(R.id.count);
         btnRetry=(Button)findViewById(R.id.btn_yes);
+
         btnRetry.setTextSize(TypedValue.COMPLEX_UNIT_PX,height/20);
 
         rdb1.setChecked(true);
@@ -171,6 +174,9 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         dataCountParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 100);
         dataCountParams.setMargins(0, 10, 0,0);
 
+
+
+
         setPics();
 
     }
@@ -262,6 +268,12 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
     @Override
     protected void onResume() {
         super.onResume();
+        onStart();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
         onStart();
     }
 }
