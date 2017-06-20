@@ -215,30 +215,24 @@ public class ADB extends SQLiteOpenHelper {
         return  pics;
     }
 
-    public int isTransactionSuccessFull(int attempt,String pic,int type){
+    public int isTransactionSuccessFull(int attempt,String pic){
         Cursor cursor=null;
         SQLiteDatabase db=this.getReadableDatabase();
-        if(type>=0&&type<=2){
-            cursor=db.rawQuery("select cue4 from "+TABLE_TRANSACTIONS +" where attempt_id=? and type=?  and  pic_id in(select id from "+TABLE_DATA+" where pic=?) ",new String[]{""+attempt,""+type,pic});
-        }else
             cursor=db.rawQuery("select cue4 from "+TABLE_TRANSACTIONS +" where attempt_id=?  and  pic_id in(select id from "+TABLE_DATA+" where pic=?) ",new String[]{""+attempt,pic});
         if(cursor.moveToFirst()) {
             return cursor.getInt(0);
         }
         return -1;
     }
-    public int getMaxAttemptsOfDay(int day,int type){
+    public int getMaxAttemptsOfDay(int day){
         int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
         Cursor cursor=null;
         SQLiteDatabase db=this.getReadableDatabase();
         String limit=(day*noOfQuestions)+","+noOfQuestions;
-        if(type>=0&&type<=2){
-            cursor=db.rawQuery("select count(attempt_id) from "+TABLE_TRANSACTIONS +" where type=? and  pic_id in(select id from "+TABLE_DATA+" where valid=?  limit "+limit+")",new String[]{""+type,"1"});
-
-        }else
             cursor=db.rawQuery("select max(attempt_id) from "+TABLE_TRANSACTIONS +" where  pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") ",new String[]{"1"});
-        if(cursor.moveToFirst())
+        if(cursor.moveToFirst()) {
             return cursor.getInt(0);
+        }
         return 0;
 
     }

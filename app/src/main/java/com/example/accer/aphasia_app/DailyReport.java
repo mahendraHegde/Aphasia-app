@@ -27,8 +27,6 @@ import android.widget.Toast;
 public class DailyReport extends AppCompatActivity implements View.OnTouchListener {
 
     TextView titleText,days;
-    RadioGroup options;
-    RadioButton rdb1,rdb2,rdb3;
     HorizontalScrollView topLinearLayout,horzScroll;
     ScrollView leftLinearLayout,dataCountContainer;
     LinearLayout.LayoutParams topLayoutParams,leftLayoutParams,dataCountParams,layoutParams;
@@ -43,8 +41,7 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
     Button btnRetry;
     ViewGroup.LayoutParams lp;
     int width,height;
-    int type=-1;
-    boolean isLastRowValid=true;
+    int lastRowValidCount=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,10 +58,6 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
 
         titleText=(TextView)findViewById(R.id.titleText);
         days=(TextView)findViewById(R.id.days);
-        options=(RadioGroup)findViewById(R.id.options);
-        rdb1=(RadioButton)findViewById(R.id.rdb1);
-        rdb2=(RadioButton)findViewById(R.id.rdb2);
-        rdb3=(RadioButton)findViewById(R.id.rdb3);
         topLinearLayout=(HorizontalScrollView) findViewById(R.id.topScroll);
         leftLinearLayout=(ScrollView) findViewById(R.id.leftScroll);
         dataCountContainer=(ScrollView)findViewById(R.id.verticalScroll);
@@ -75,32 +68,11 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         dataLinear=(LinearLayout)findViewById(R.id.count);
         btnRetry=(Button)findViewById(R.id.btn_yes);
 
-        rdb1.setChecked(true);
-
-        options.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, @IdRes int i) {
-                switch (i){
-                    case R.id.rdb1 :
-                        type=-1;
-                        setPics();
-                        break;
-                    case R.id.rdb2 :
-                        type=1;
-                        setPics();
-                        break;
-                    case R.id.rdb3 :
-                        type=2;
-                        setPics();
-                        break;
-                }
-            }
-        });
-
 
         btnRetry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                finish();
                 Intent in=new Intent(getApplicationContext(),Attempt.class);
                 in.putExtra("day",day+1);
                 startActivity(in);
@@ -122,16 +94,6 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
         lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
         lp.height= (int) (height*.1);
         titleText.setLayoutParams(lp);
-
-        lp=options.getLayoutParams();
-        lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.height= (int) (height*.1);
-        options.setLayoutParams(lp);
-
-        lp=options.getLayoutParams();
-        lp.width= (int) (LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.height= (int) (height*.1);
-        options.setLayoutParams(lp);
 
         lp=topLinearLayout.getLayoutParams();
         lp.width= (int) (width*.85);
@@ -160,9 +122,6 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
 
         titleText.setText("ದೈನಂದಿನ ವರದಿ : ದಿನ "+(day+1));
         titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
-        rdb1.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
-        rdb2.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
-        rdb3.setTextSize(TypedValue.COMPLEX_UNIT_SP,23);
 
         topLayoutParams = new LinearLayout.LayoutParams(300,300);
         topLayoutParams.setMargins(10, 10, 0, 10);
@@ -197,38 +156,31 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
                 btn.setImageDrawable(getResources().getDrawable(getResources().getIdentifier(pics[i-1], "drawable", getPackageName())));
             }
         }
-        for (int i = 1; i <=db.getMaxAttemptsOfDay(day,type); i++)//attempts per day
+        for (int i = 1; i <=db.getMaxAttemptsOfDay(day); i++)//attempts per day
         {
+            lastRowValidCount=0;
             final TextView btn = new TextView(this);
             btn.setText("ಪ್ರಯತ್ನ " + i);
             //btn.setGravity(5);
             //btn.setTextSize(TypedValue.COMPLEX_UNIT_SP,18);
-            leftLinear.addView(btn,leftLayoutParams);
-            lp=btn.getLayoutParams();
-            lp.width=(int) (width*.1);
-            lp.height=(int) (height*.1);
-            btn.setLayoutParams(lp);
+
 
             final LinearLayout layout=new LinearLayout(this);
             layout.setOrientation(LinearLayout.HORIZONTAL);
             for(int j=1;j<=pics.length;j++)
             {
                 final ImageView btn1=new ImageView(this);
-                switch (db.isTransactionSuccessFull(i,pics[j-1],type)){
+                switch (db.isTransactionSuccessFull(i,pics[j-1])){
                     case 0:
-                        isLastRowValid=true;
                         btn1.setBackgroundResource(R.drawable.tick_small);
                         break;
                     case 1:
-                        isLastRowValid=true;
                         btn1.setBackgroundResource(R.drawable.untick_small);
                         break;
                     default:
-                        isLastRowValid=false;
+                        lastRowValidCount++;
                         btn1.setBackgroundResource(R.drawable.dash_small);
                         break;
-
-
                 }
                 layout.addView(btn1, topLayoutParams);
                 lp=btn1.getLayoutParams();
@@ -236,13 +188,18 @@ public class DailyReport extends AppCompatActivity implements View.OnTouchListen
                 lp.height=(int) (height*.12);
                 btn1.setLayoutParams(lp);
             }
-
+            if(lastRowValidCount<pics.length){
+                leftLinear.addView(btn,leftLayoutParams);
+                lp=btn.getLayoutParams();
+                lp.width=(int) (width*.1);
+                lp.height=(int) (height*.1);
+                btn.setLayoutParams(lp);
                 dataLinear.addView(layout, dataCountParams);
                 lp = layout.getLayoutParams();
                 lp.width = (int) (LinearLayout.LayoutParams.MATCH_PARENT);
                 lp.height = (int) (height * .15);
                 layout.setLayoutParams(lp);
-           // Toast.makeText(getApplicationContext(),""+i,Toast.LENGTH_LONG).show();
+            }
         }
 
 
