@@ -16,7 +16,6 @@ import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.nio.channels.FileChannel;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by Mahendra on 6/2/2017.
@@ -35,6 +34,7 @@ public  class Meta implements Serializable {
     private String failedPics[];//stores failed pics of an attempt (will be reset everyday)
     private boolean dailyPicsOver;//check whether to repeat failed attempt or to continue with regular pics
     private boolean failedLooping;
+    private int maxGivenTimeElapsed;
    static Context ctx;
     Meta(Context c){
         ctx=c;
@@ -51,8 +51,18 @@ public  class Meta implements Serializable {
         failedPics=null;
         dailyPicsOver=false;
         failedLooping=false;
+        maxGivenTimeElapsed =0;
         setCalendar();
 
+    }
+
+    public int getMaxGivenTimeElapsed() {
+        return maxGivenTimeElapsed;
+    }
+
+    public void setMaxGivenTimeElapsed(int maxGivenTimeElapsed) {
+        this.maxGivenTimeElapsed = maxGivenTimeElapsed;
+        Toast.makeText(ctx,""+maxGivenTimeElapsed,Toast.LENGTH_LONG).show();
     }
 
     public boolean isFailedLooping() {

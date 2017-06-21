@@ -50,6 +50,7 @@ public class ADB extends SQLiteOpenHelper {
                 "cue2 INTGER DEFAULT 0," +
                 "cue3 INTGER DEFAULT 0," +
                 "cue4 INTGER DEFAULT 0," +
+                "time TEXT," +
                 "PRIMARY KEY (type,attempt_id,pic_id)"+
                 ")";
        // db.execSQL("PRAGMA foreign_keys=ON");
@@ -81,7 +82,7 @@ public class ADB extends SQLiteOpenHelper {
         return arr;
     }
 
-    public void addTransaction(int type,int attempt,int pic_id,int cue1,int cue2,int cue3,int cue4){
+    public void addTransaction(int type,int attempt,int pic_id,int cue1,int cue2,int cue3,int cue4,String time){
         SQLiteDatabase db=this.getWritableDatabase();
         ContentValues values=new ContentValues();
         values.put("type",type);
@@ -91,10 +92,11 @@ public class ADB extends SQLiteOpenHelper {
         values.put("cue2",cue2);
         values.put("cue3",cue3);
         values.put("cue4",cue4);
+        values.put("time",time);
         try {
             db.insertOrThrow(TABLE_TRANSACTIONS,null,values);
         }catch (SQLiteConstraintException ex){
-            db.execSQL("update "+TABLE_TRANSACTIONS+" set cue1=cue1+"+cue1+ ",cue2=cue2+"+cue2+",cue3=cue3+"+cue3+",cue4=cue4+"+cue4+" where type="+type+" and attempt_id="+attempt+" and pic_id="+pic_id);
+            db.execSQL("update "+TABLE_TRANSACTIONS+" set cue1=cue1+"+cue1+ ",cue2=cue2+"+cue2+",cue3=cue3+"+cue3+",cue4=cue4+"+cue4+",time=? where type="+type+" and attempt_id="+attempt+" and pic_id="+pic_id,new String[]{time});
         }finally {
             db.close();
 

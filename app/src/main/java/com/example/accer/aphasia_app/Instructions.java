@@ -74,7 +74,7 @@ public class Instructions extends AppCompatActivity {
                 spChoice.setVisibility(View.VISIBLE);
 
             if(last!=tod&&meta.getLastDate().getTimeInMillis()<Calendar.getInstance().getTimeInMillis()){
-
+                meta.setMaxGivenTimeElapsed(0);
                 meta.setTodayTrainingOver(false);
                 meta.setFailedPics(null);
                 meta.setDailyPicsOver(false);

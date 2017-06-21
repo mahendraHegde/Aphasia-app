@@ -33,6 +33,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 public class Attempt extends AppCompatActivity implements View.OnClickListener{
 
@@ -59,8 +60,9 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
 
     Button btnc1,btnc2,btnc3,btnc4;
     int cue1=0,cue2=0,cue3=0,cue4=0;
-    Handler maxGivenTimeHandler=null;
+    CountDownTimer timer=null,maxGivenCountDownTimer=null;
     int type=2;
+    String timeTaken;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,7 +85,6 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
 
 
         handler = new Handler();
-        maxGivenTimeHandler=new Handler();
 
 
 
@@ -161,40 +162,27 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
             }
         });
 
-
-        new Handler().postDelayed(new Runnable() {
+        maxGivenCountDownTimer=new CountDownTimer(maxGivenTime*1000*60,1000) {
             @Override
-            public void run() {
-                Snackbar.make(findViewById(R.id.trainingConstraint),"ಕೇವಲ 1 ನಿಮಿಷ ಉಳಿದಿದೆ",Snackbar.LENGTH_LONG).show();
-                Vibrator v = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(1000);
+            public void onTick(long l) {
+                if((l/1000)==60){
+                    Snackbar.make(findViewById(R.id.trainingConstraint),"ಕೇವಲ 1 ನಿಮಿಷ ಉಳಿದಿದೆ",Snackbar.LENGTH_LONG).show();
+                    Vibrator v = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+                    v.vibrate(1000);
+                }
             }
-        },1000*60*(maxGivenTime-1));
-
-        maxGivenTimeHandler.postDelayed(new Runnable() {
             @Override
-            public void run() {
+            public void onFinish() {
                 if(wl!=null&&wl.isHeld())
                     wl.release();
                 if(handler!=null) {
                     handler.removeCallbacks(handlerRunnable);
                     handler.removeCallbacksAndMessages(null);
                 }
-                meta.setTodayTrainingOver(true);
-                meta.setLastDate(todayDate);
-                meta.setDailyPicsOver(false);
-                meta.setFailedPics(null);
-                meta.setFailedLooping(false);
-                meta.write();
-                if(handler!=null) {
-                    handler.removeCallbacks(handlerRunnable);
-                    handler.removeCallbacksAndMessages(null);
-                }
-                Intent i=new Intent(getApplicationContext(),Instructions.class);
-                i.putExtra("activity","training");
+                Intent i=new Intent(getApplicationContext(),DailyReport.class);
                 startActivity(i);
             }
-        },maxGivenTime*1000*60);
+        }.start();
 
         pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WakeLock");
@@ -256,7 +244,7 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
                                 cue4=1;
                                 break;
                         }
-                        db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],cue1,cue2,cue3,cue4);
+                        db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],cue1,cue2,cue3,cue4,timeTaken);
                     }
                 });
                 ctr++;
@@ -313,33 +301,33 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
         int id=view.getId();
         switch (id){
             case R.id.btn_tick :
-                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,0,0);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,0,0,timeTaken);
                 stopPlayer();
                 player=MediaPlayer.create(this,R.raw.tick_sound);
                 player.start();
                 setImg();
                 break;
             case R.id.btn_cue1 :
-                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],1,0,0,0);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],1,0,0,0,timeTaken);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_1","raw",getPackageName()));
                 player.start();
                 break;
 
             case R.id.btn_cue2 :
-                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,1,0,0);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,1,0,0,timeTaken);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_2","raw",getPackageName()));
                 player.start();
 
                 break;
             case R.id.btn_cue3 :
-                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,1,0);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,1,0,timeTaken);
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_3","raw",getPackageName()));
                 player.start();
                 break;
             case R.id.btn_cue4 :
-                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,0,1);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,0,1,timeTaken);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_4","raw",getPackageName()));
                 player.start();
@@ -350,6 +338,24 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
 
 
     void setImg(){
+
+        if(timer!=null)
+            timer.cancel();
+        timer=new CountDownTimer(maxGivenTime*1000*60,1000) {
+            @Override
+            public void onTick(long l) {
+                timeTaken=""+((maxGivenTime*60-l/1000)/60)+":"+((maxGivenTime*60-l/1000)%60);
+            }
+            @Override
+            public void onFinish() {
+
+            }
+        };
+
+        timer.start();
+
+
+
         position++;
         if(position<threashold&&position<pics.length&&position>-1) {
             picAttemptArray=db.getLastAttemptFromTransaction(pics[position],type);
@@ -417,6 +423,10 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
             handler.removeCallbacks(handlerRunnable);
             handler.removeCallbacksAndMessages(null);
         }
+        if(timer!=null)
+            timer.cancel();
+        if(maxGivenCountDownTimer!=null)
+            maxGivenCountDownTimer.cancel();
 
         todayDate=Calendar.getInstance();
 

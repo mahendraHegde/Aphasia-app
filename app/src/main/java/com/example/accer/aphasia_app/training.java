@@ -4,7 +4,6 @@ package com.example.accer.aphasia_app;
 *
 * */
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -14,16 +13,13 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -33,6 +29,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 public class training extends AppCompatActivity implements View.OnClickListener{
 
@@ -44,7 +41,8 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     PowerManager pm;
     PowerManager.WakeLock wl;
     int position=-1;
-     int interval=2,maxGivenTime=25,ctr;
+    int interval=2,maxGivenTime=25,ctr;
+    final int maxGivenTimeConstant=25;
     int threashold=0;
     static  MediaPlayer player;
     String pics[]=null;
@@ -58,8 +56,9 @@ public class training extends AppCompatActivity implements View.OnClickListener{
 
     Button btnc1,btnc2,btnc3,btnc4;
     int cue1=0,cue2=0,cue3=0,cue4=0;
-    Handler maxGivenTimeHandler=null;
     ImageButton btnIns,btnHome;
+    CountDownTimer timer=null,maxGivenCountDownTimer=null;
+    String timeTaken;
     int type=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +83,6 @@ public class training extends AppCompatActivity implements View.OnClickListener{
 
 
         handler = new Handler();
-        maxGivenTimeHandler=new Handler();
 
 
 
@@ -114,9 +112,10 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                 }
             }else
                 pics = db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions());
-                threashold=pics.length;
+            threashold=pics.length;
 
         }
+       maxGivenTime-=meta.getMaxGivenTimeElapsed();
         if(meta.isTodayTrainingOver()){
             finish();
         }
@@ -185,19 +184,18 @@ public class training extends AppCompatActivity implements View.OnClickListener{
 
 
 
-
-        new Handler().postDelayed(new Runnable() {
+        maxGivenCountDownTimer=new CountDownTimer(maxGivenTime*1000*60,1000) {
             @Override
-            public void run() {
-                Snackbar.make(findViewById(R.id.trainingConstraint),"ಕೇವಲ 1 ನಿಮಿಷ ಉಳಿದಿದೆ",Snackbar.LENGTH_LONG).show();
-                Vibrator v = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(1000);
+            public void onTick(long l) {
+                meta.setMaxGivenTimeElapsed((int) (maxGivenTimeConstant-(TimeUnit.MILLISECONDS.toMinutes(l))));
+                if((l/1000)==60){
+                    Snackbar.make(findViewById(R.id.trainingConstraint),"ಕೇವಲ 1 ನಿಮಿಷ ಉಳಿದಿದೆ",Snackbar.LENGTH_LONG).show();
+                    Vibrator v = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+                    v.vibrate(1000);
+                }
             }
-        },1000*60*(maxGivenTime-1));
-
-        maxGivenTimeHandler.postDelayed(new Runnable() {
             @Override
-            public void run() {
+            public void onFinish() {
                 if(wl!=null&&wl.isHeld())
                     wl.release();
                 if(handler!=null) {
@@ -218,7 +216,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                 i.putExtra("activity","training");
                 startActivity(i);
             }
-        },maxGivenTime*1000*60);
+        }.start();
 
         pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WakeLock");
@@ -227,101 +225,101 @@ public class training extends AppCompatActivity implements View.OnClickListener{
 
     }
 
-  public void startTimer(){
-      btnc1.setEnabled(false);
-      btnc2.setEnabled(false);
-      btnc3.setEnabled(false);
-      btnc4.setEnabled(false);
-      ctr=1;
-          handlerRunnable=new Runnable() {
-              @Override
-              public void run() {
-                  if(player!=null&&player.isPlaying()) {
-                      handler.removeCallbacks(handlerRunnable);
-                      handler.postDelayed(this, (interval*1000)+player.getDuration());
+    public void startTimer(){
+        btnc1.setEnabled(false);
+        btnc2.setEnabled(false);
+        btnc3.setEnabled(false);
+        btnc4.setEnabled(false);
+        ctr=1;
+        handlerRunnable=new Runnable() {
+            @Override
+            public void run() {
+                if(player!=null&&player.isPlaying()) {
+                    handler.removeCallbacks(handlerRunnable);
+                    handler.postDelayed(this, (interval*1000)+player.getDuration());
 
-                      if(ctr==4)
-                          btnc4.setEnabled(true);
-                      return;
-                  }
+                    if(ctr==4)
+                        btnc4.setEnabled(true);
+                    return;
+                }
 
-                  stopPlayer();
-                  player = MediaPlayer.create(getApplicationContext(), getResources().getIdentifier(img.getTag() + "_" + ctr, "raw", getPackageName()));
-                  player.start();
-                  switch (ctr){
-                      case 1:
-                          btnc1.setEnabled(true);
-                          btnc2.setEnabled(false);
-                          btnc3.setEnabled(false);
-                          btnc4.setEnabled(false);
-                          break;
-                      case 2:
-                          btnc1.setEnabled(false);
-                          btnc2.setEnabled(true);
-                          btnc3.setEnabled(false);
-                          btnc4.setEnabled(false);
-                          break;
-                      case 3:
-                          btnc1.setEnabled(false);
-                          btnc2.setEnabled(false);
-                          btnc3.setEnabled(true);
-                          btnc4.setEnabled(false);
-                          break;
-                      case 4:
-                          btnc1.setEnabled(false);
-                          btnc2.setEnabled(false);
-                          btnc3.setEnabled(false);
-                          btnc4.setEnabled(true);
-                          break;
-                  }
-                  player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                      @Override
-                      public void onCompletion(MediaPlayer mediaPlayer) {
-                          switch (ctr-1){
-                              case 1:
-                                  cue1=1;
-                                  cue2=0;
-                                  cue3=0;
-                                  cue4=0;
-                                  break;
+                stopPlayer();
+                player = MediaPlayer.create(getApplicationContext(), getResources().getIdentifier(img.getTag() + "_" + ctr, "raw", getPackageName()));
+                player.start();
+                switch (ctr){
+                    case 1:
+                        btnc1.setEnabled(true);
+                        btnc2.setEnabled(false);
+                        btnc3.setEnabled(false);
+                        btnc4.setEnabled(false);
+                        break;
+                    case 2:
+                        btnc1.setEnabled(false);
+                        btnc2.setEnabled(true);
+                        btnc3.setEnabled(false);
+                        btnc4.setEnabled(false);
+                        break;
+                    case 3:
+                        btnc1.setEnabled(false);
+                        btnc2.setEnabled(false);
+                        btnc3.setEnabled(true);
+                        btnc4.setEnabled(false);
+                        break;
+                    case 4:
+                        btnc1.setEnabled(false);
+                        btnc2.setEnabled(false);
+                        btnc3.setEnabled(false);
+                        btnc4.setEnabled(true);
+                        break;
+                }
+                player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mediaPlayer) {
+                        switch (ctr-1){
+                            case 1:
+                                cue1=1;
+                                cue2=0;
+                                cue3=0;
+                                cue4=0;
+                                break;
 
-                              case 2:
-                                  cue1=0;
-                                  cue2=1;
-                                  cue3=0;
-                                  cue4=0;
-                                  break;
+                            case 2:
+                                cue1=0;
+                                cue2=1;
+                                cue3=0;
+                                cue4=0;
+                                break;
 
-                              case 3:
-                                  cue1=0;
-                                  cue2=0;
-                                  cue3=1;
-                                  cue4=0;
-                                  break;
+                            case 3:
+                                cue1=0;
+                                cue2=0;
+                                cue3=1;
+                                cue4=0;
+                                break;
 
-                              case 4:
-                                  cue1=0;
-                                  cue2=0;
-                                  cue3=0;
-                                  cue4=1;
-                                  break;
-                          }
-                          db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],cue1,cue2,cue3,cue4);
-                      }
-                  });
-                  ctr++;
-                  if (ctr <4)
-                      handler.postDelayed(this, (interval * 1000)+player.getDuration());
-                 else if(ctr==4) {
-                      handler.postDelayed(this, (1000 * 10/*30*/)+player.getDuration());//after 3rd cue gets over
-                      new Handler().postDelayed(new Runnable() {
-                          @Override
-                          public void run() {
-                                  btnc1.setEnabled(true);
-                                  btnc2.setEnabled(true);
-                                  btnc3.setEnabled(true);
-                          }
-                      },10*1000);
+                            case 4:
+                                cue1=0;
+                                cue2=0;
+                                cue3=0;
+                                cue4=1;
+                                break;
+                        }
+                        db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],cue1,cue2,cue3,cue4,timeTaken);
+                    }
+                });
+                ctr++;
+                if (ctr <4)
+                    handler.postDelayed(this, (interval * 1000)+player.getDuration());
+                else if(ctr==4) {
+                    handler.postDelayed(this, (1000 * 10/*30*/)+player.getDuration());//after 3rd cue gets over
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            btnc1.setEnabled(true);
+                            btnc2.setEnabled(true);
+                            btnc3.setEnabled(true);
+                        }
+                    },10*1000);
 /*                      new Handler().postDelayed(new Runnable() {
                           @Override
                           public void run() {
@@ -329,33 +327,33 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                           }
                       },1000*30);*/
 
-                  }
-                  else if(position<=threashold-1) {
-                      new Handler().postDelayed(new Runnable() {
-                          @Override
-                          public void run() {
-                              if(player!=null&&player.isPlaying()){
-                                  new Handler().postDelayed(this,6000);
+                }
+                else if(position<=threashold-1) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(player!=null&&player.isPlaying()){
+                                new Handler().postDelayed(this,6000);
 
                                   /*stores failed attempts for next iteration(in secondary storage)*/
-                                  if(failedPicsArralist!=null&&!failedPicsArralist.contains(pics[position])) {
-                                      failedPicsArralist.add(pics[position]);
-                                      meta.setFailedPics(failedPicsArralist.toArray(new String[failedPicsArralist.size()]));
-                                      meta.write();
-                                  }
+                                if(failedPicsArralist!=null&&!failedPicsArralist.contains(pics[position])) {
+                                    failedPicsArralist.add(pics[position]);
+                                    meta.setFailedPics(failedPicsArralist.toArray(new String[failedPicsArralist.size()]));
+                                    meta.write();
+                                }
 
-                                  btntick.setEnabled(false);
-                                  return;
-                              }
-                              btntick.setEnabled(true);
-                              setImg();
-                          }
-                      },2000);
-                  }
-              }
-          };
-          handler.postDelayed(handlerRunnable,interval*1000);
-  }
+                                btntick.setEnabled(false);
+                                return;
+                            }
+                            btntick.setEnabled(true);
+                            setImg();
+                        }
+                    },2000);
+                }
+            }
+        };
+        handler.postDelayed(handlerRunnable,interval*1000);
+    }
     @Override
     protected void onDestroy() {
         if(wl.isHeld())
@@ -367,21 +365,21 @@ public class training extends AppCompatActivity implements View.OnClickListener{
 
     @Override
     public void onClick(View view) {
-      int id=view.getId();
+        int id=view.getId();
         switch (id){
             case R.id.btn_tick :
                 if(failedPicsArralist!=null&&failedPicsArralist.contains(pics[position])) {
                     failedPicsArralist.remove(pics[position]);
-                        ArrayList<String> temp=new ArrayList<String>(Arrays.asList(pics));
-                        if(temp.contains(pics[position])){
-                            temp.remove(pics[position]);
-                            pics=new String[temp.size()];
-                            pics=temp.toArray(pics);
-                        }
-                        meta.setFailedPics(failedPicsArralist.toArray(new String[failedPicsArralist.size()]));
-                        meta.write();
+                    ArrayList<String> temp=new ArrayList<String>(Arrays.asList(pics));
+                    if(temp.contains(pics[position])){
+                        temp.remove(pics[position]);
+                        pics=new String[temp.size()];
+                        pics=temp.toArray(pics);
+                    }
+                    meta.setFailedPics(failedPicsArralist.toArray(new String[failedPicsArralist.size()]));
+                    meta.write();
                 }
-                 db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,0,0);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,0,0,timeTaken);
                 stopPlayer();
                 player=MediaPlayer.create(this,R.raw.tick_sound);
                 player.start();
@@ -391,26 +389,26 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                 }
                 break;
             case R.id.btn_cue1 :
-                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],1,0,0,0);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],1,0,0,0,timeTaken);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_1","raw",getPackageName()));
                 player.start();
                 break;
 
             case R.id.btn_cue2 :
-                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,1,0,0);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,1,0,0,timeTaken);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_2","raw",getPackageName()));
                 player.start();
 
                 break;
             case R.id.btn_cue3 :
-                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,1,0);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,1,0,timeTaken);
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_3","raw",getPackageName()));
                 player.start();
                 break;
             case R.id.btn_cue4 :
-                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,0,1);
+                db.addTransaction(type,picAttemptArray[1]+1,picAttemptArray[0],0,0,0,1,timeTaken);
                 stopPlayer();
                 player = MediaPlayer.create(getApplicationContext(),getResources().getIdentifier(img.getTag()+"_4","raw",getPackageName()));
                 player.start();
@@ -432,6 +430,24 @@ public class training extends AppCompatActivity implements View.OnClickListener{
 
 
     void setImg(){
+
+        if(timer!=null)
+            timer.cancel();
+        timer=new CountDownTimer(maxGivenTime*1000*60,1000) {
+            @Override
+            public void onTick(long l) {
+                timeTaken=""+((maxGivenTime*60-l/1000)/60)+":"+((maxGivenTime*60-l/1000)%60);
+            }
+            @Override
+            public void onFinish() {
+
+            }
+        };
+
+        timer.start();
+
+
+
         position++;
         if(position<threashold&&position<pics.length&&position>-1) {
             picAttemptArray=db.getLastAttemptFromTransaction(pics[position],type);
@@ -452,23 +468,23 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                 handler.removeCallbacks(handlerRunnable);
                 handler.removeCallbacksAndMessages(null);
             }
-                if(meta.read()!=null){
-                    meta=meta.read();
-                    position=-1;
-                    pics=new String[failedPicsArralist.size()];
-                    if(failedPicsArralist.size()<=0) {
-                        cleanUp();
-                        return;
-                    }
-                    pics=failedPicsArralist.toArray(pics);
-                    failedPicsArralist=new ArrayList<>();
-                    meta.setFailedLooping(true);
-                    type=1;
-                    meta.write();
-                    threashold =pics.length;
-                    setImg();
+            if(meta.read()!=null){
+                meta=meta.read();
+                position=-1;
+                pics=new String[failedPicsArralist.size()];
+                if(failedPicsArralist.size()<=0) {
+                    cleanUp();
+                    return;
                 }
+                pics=failedPicsArralist.toArray(pics);
+                failedPicsArralist=new ArrayList<>();
+                meta.setFailedLooping(true);
+                type=1;
+                meta.write();
+                threashold =pics.length;
+                setImg();
             }
+        }
     }
     void stopPlayer(){
         if(player!=null){
@@ -516,6 +532,10 @@ public class training extends AppCompatActivity implements View.OnClickListener{
             handler.removeCallbacksAndMessages(null);
         }
 
+        if(maxGivenCountDownTimer!=null)
+            maxGivenCountDownTimer.cancel();
+        if(timer!=null)
+            timer.cancel();
         todayDate=Calendar.getInstance();/*
         int last=lastDate.get(Calendar.DATE);
         int tod=todayDate.get(Calendar.DATE);*/
