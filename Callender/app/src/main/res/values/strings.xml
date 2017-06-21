@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Callender</string>
+    <string name="title_activity_table">table</string>
+    <string name="table_activity_question">ನೀವು ಮತ್ತೆ ಈ ಪರೀಕ್ಷೆಯನ್ನು ಬರೆಯಲು ಸಿದ್ಧರಿದ್ದೀರಾ?</string>
+    <string name="table_activity_title">ಚಿತ್ರಗಳು \n\nಪ್ರಯತ್ನಗಳು</string>
+</resources>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.accer.callender.table">
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:id="@+id/days"
+        android:text="@string/table_activity_title"
+        android:textSize="20dp"
+        android:layout_marginTop="10dp"/>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_toRightOf="@+id/days"
+        android:id="@+id/topScroll">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:id="@+id/topImage"
+        android:padding="5dp">
+
+    </LinearLayout>
+    </HorizontalScrollView>
+    <ScrollView
+        android:layout_width="100dp"
+        android:layout_height="200dp"
+        android:layout_below="@+id/topScroll"
+        android:id="@+id/leftScroll"
+        android:background="#ff00ff">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#ff00ff"
+            android:id="@+id/attempts"
+            android:padding="7dp">
+
+        </LinearLayout>
+    </ScrollView>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@id/topScroll"
+        android:layout_toRightOf="@id/leftScroll"
+        android:id="@+id/verticalScroll"
+        android:background="#ffff00">
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/horzScroll">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#ffff00"
+                android:orientation="vertical"
+                android:id="@+id/count">
+            </LinearLayout>
+        </HorizontalScrollView>
+    </ScrollView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:layout_below="@+id/verticalScroll"
+        android:padding="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+             android:text="@string/table_activity_question"
+            android:textSize="20dp"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/yes"
+            android:text="ಹೌದು"
+            android:background="#0000ff"
+            android:layout_marginRight="15dp"
+            android:layout_alignParentRight="true"/>
+
+
+    </RelativeLayout>
+
+</RelativeLayout>
