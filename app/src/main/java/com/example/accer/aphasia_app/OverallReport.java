@@ -23,7 +23,7 @@ import com.github.mikephil.charting.utils.MPPointF;
 
 import java.util.ArrayList;
 
-public class FollowUp extends AppCompatActivity {
+public class OverallReport extends AppCompatActivity {
 
     private PieChart mChart1;
     private SeekBar mSeekBarX, mSeekBarY;
@@ -31,7 +31,7 @@ public class FollowUp extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_follow_up);
+        setContentView(R.layout.activity_overall_report);
 
         mChart1 =(PieChart)findViewById(R.id.pieChart);
         mChart1.setUsePercentValues(false);
