@@ -115,7 +115,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
             threashold=pics.length;
 
         }
-       maxGivenTime-=meta.getMaxGivenTimeElapsed();
+       maxGivenTime=maxGivenTimeConstant-meta.getMaxGivenTimeElapsed();
         if(meta.isTodayTrainingOver()){
             finish();
         }

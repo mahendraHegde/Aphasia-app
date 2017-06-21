@@ -66,7 +66,10 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .show();
         }else{
-            startActivity(new Intent(this, Home.class));
+            //startActivity(new Intent(this, Home.class));
+            startActivity(new Intent(this, OverallReport.class));
+
+
         }
     }
     void askPermission(){

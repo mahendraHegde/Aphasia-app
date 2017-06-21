@@ -8,9 +8,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -19,6 +21,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ImageSpan;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -45,6 +50,11 @@ public class Instructions extends AppCompatActivity {
     ObjectAnimator anim=null;
     Meta meta;
     Calendar calendar;
+    String resource;
+    SpannableString spannableString;
+    int index;
+    Drawable d;
+    ImageSpan span;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,8 +110,37 @@ public class Instructions extends AppCompatActivity {
             }
 
 
+            resource=new String(getResources().getString(R.string.training_ins));
+            spannableString= new SpannableString(resource);
 
-            txtIns.setText(getResources().getString(R.string.training_ins));
+             d = null;
+            index=resource.indexOf("✔");
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                d = getDrawable(R.drawable.tick_small);
+            }else {
+                d = getResources().getDrawable(R.drawable.tick_small);
+            }
+            d.setBounds(0, 0, d.getIntrinsicWidth()/10, d.getIntrinsicHeight()/10);
+            span= new ImageSpan(d, ImageSpan.ALIGN_BOTTOM);
+            spannableString.setSpan(span, index, index+1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+
+
+            index=resource.indexOf("@");
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                d = getDrawable(R.drawable.hint);
+            }else {
+                d = getResources().getDrawable(R.drawable.hint);
+            }
+            d.setBounds(0, 0, d.getIntrinsicWidth()/2, d.getIntrinsicHeight()/2);
+            span= new ImageSpan(d, ImageSpan.ALIGN_BOTTOM);
+            spannableString.setSpan(span, index, index+1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+
+
+
+            txtIns.setText(spannableString);
+
             for(int i=3;i<=max;i++){
                 list.add(i+"  ಪ್ರಶ್ನೆಗಳಿಗೆ ");
             }
@@ -127,8 +166,34 @@ public class Instructions extends AppCompatActivity {
             });
 
         }
-        else
-            txtIns.setText(getResources().getString(R.string.baseline_ins));
+        else {
+            resource=new String(getResources().getString(R.string.baseline_ins));
+            spannableString=new SpannableString(resource);
+
+            index=resource.indexOf("✔");
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                d = getDrawable(R.drawable.tick_small);
+            }else {
+                d = getResources().getDrawable(R.drawable.tick_small);
+            }
+            d.setBounds(0, 0, d.getIntrinsicWidth()/10, d.getIntrinsicHeight()/10);
+            span= new ImageSpan(d, ImageSpan.ALIGN_BOTTOM);
+            spannableString.setSpan(span, index, index+1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+
+            index=resource.indexOf("@");
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                d = getDrawable(R.drawable.untick_small);
+            }else {
+                d = getResources().getDrawable(R.drawable.untick_small);
+            }
+            d.setBounds(0, 0, d.getIntrinsicWidth()/2, d.getIntrinsicHeight()/2);
+            span= new ImageSpan(d, ImageSpan.ALIGN_BOTTOM);
+            spannableString.setSpan(span, index, index+1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+
+            txtIns.setText(spannableString);
+        }
 
         btnstart.setOnClickListener(new View.OnClickListener() {
             @Override

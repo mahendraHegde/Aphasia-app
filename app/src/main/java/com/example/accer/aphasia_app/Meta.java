@@ -62,7 +62,6 @@ public  class Meta implements Serializable {
 
     public void setMaxGivenTimeElapsed(int maxGivenTimeElapsed) {
         this.maxGivenTimeElapsed = maxGivenTimeElapsed;
-        Toast.makeText(ctx,""+maxGivenTimeElapsed,Toast.LENGTH_LONG).show();
     }
 
     public boolean isFailedLooping() {

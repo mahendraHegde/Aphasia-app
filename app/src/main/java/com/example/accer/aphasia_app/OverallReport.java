@@ -14,13 +14,17 @@ import android.widget.TextView;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.MPPointF;
+import com.github.mikephil.charting.utils.ViewPortHandler;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class OverallReport extends AppCompatActivity {
@@ -82,8 +86,9 @@ public class OverallReport extends AppCompatActivity {
         // NOTE: The order of the entries when being added to the entries array determines their position around the center of
         // the chart.
 
-            entries.add(new PieEntry(10,"ವಿಫಲವಾಗಿದೆ"));
-            entries.add(new PieEntry(20,"ಯಶಸ್ವಿ"));
+        entries.add(new PieEntry(20,"ಯಶಸ್ವಿ"));
+        entries.add(new PieEntry(10,"ವಿಫಲವಾಗಿದೆ"));
+
 
         PieDataSet dataSet = new PieDataSet(entries,"ಒಟ್ಟಾರೆ ಪ್ರಗತಿ");
 
@@ -95,7 +100,7 @@ public class OverallReport extends AppCompatActivity {
 
         ArrayList<Integer> colors = new ArrayList<Integer>();
 
-        for (int c : ColorTemplate.VORDIPLOM_COLORS)
+        for (int c : ColorTemplate.MATERIAL_COLORS)
             colors.add(c);
 
         colors.add(ColorTemplate.getHoloBlue());
@@ -103,8 +108,8 @@ public class OverallReport extends AppCompatActivity {
         dataSet.setColors(colors);
 
         PieData data = new PieData(dataSet);
-        data.setValueFormatter(new PercentFormatter());
-        data.setValueTextSize(15f);
+        data.setValueFormatter(new MyValueFormatter());
+        data.setValueTextSize(20f);
         data.setValueTextColor(Color.WHITE);
         mChart1.setData(data);
 
@@ -115,13 +120,23 @@ public class OverallReport extends AppCompatActivity {
     }
     private SpannableString generateCenterSpannableText() {
 
-        SpannableString s = new SpannableString("MPAndroidChart\ndeveloped by Philipp Jahoda");
+        SpannableString s = new SpannableString("ಯಶಸ್ಸು - ವೈಫಲ್ಯ\nವರದಿ");
         s.setSpan(new RelativeSizeSpan(1.7f), 0, 14, 0);
-        s.setSpan(new StyleSpan(Typeface.NORMAL), 14, s.length() - 15, 0);
-        s.setSpan(new ForegroundColorSpan(Color.GRAY), 14, s.length() - 15, 0);
-        s.setSpan(new RelativeSizeSpan(.8f), 14, s.length() - 15, 0);
-        s.setSpan(new StyleSpan(Typeface.ITALIC), s.length() - 14, s.length(), 0);
-        s.setSpan(new ForegroundColorSpan(ColorTemplate.getHoloBlue()), s.length() - 14, s.length(), 0);
+        s.setSpan(new StyleSpan(Typeface.NORMAL), 14, s.length(), 0);
         return s;
+    }
+}
+class MyValueFormatter implements IValueFormatter {
+
+    private DecimalFormat mFormat;
+
+    public MyValueFormatter() {
+        mFormat = new DecimalFormat("###,###,##0.0"); // use one decimal
+    }
+
+    @Override
+    public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+        // write your logic here
+        return mFormat.format(value); // e.g. append a dollar-sign
     }
 }
