@@ -28,27 +28,27 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class BaselineTest extends AppCompatActivity implements View.OnClickListener {
+public class FollowUp extends AppCompatActivity implements View.OnClickListener {
     ImageView img;
     ImageButton btntick,btnuntic;
     RelativeLayout r1,r3;
     PowerManager pm;
     PowerManager.WakeLock wl;
-     Button timer;
+    Button timer;
     final int interval=21;
     int position=0,threashold=24;
     ADB db;
     CountDownTimer countDownTimer;
     MediaPlayer player;
-    ArrayList<ADB.Collect> list;
     ProgressBar progressBar;
     TextView txtProgress;
     Meta meta;
+    String[] pics=null;
     boolean doubleBackToExitPressedOnce;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_baseline_test);
+        setContentView(R.layout.activity_follow_up);
         r1=(RelativeLayout)findViewById(R.id.relative_image);
         r3=(RelativeLayout)findViewById(R.id.relative_check);
         img=(ImageView)findViewById(R.id.img_training);
@@ -60,23 +60,15 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
         db=new ADB(this);
         meta=new Meta(this);
 
-
-
-        threashold=(int)db.getDataRowCount();
-
-
-
         if(meta.read()!=null){
             meta=meta.read();
-            position=meta.baselinePosition;
+            position=meta.getBaselinePosition();
         }
+        pics = db.getDataPics("valid", "1",("0,"+(Home.FOLLOW_UP_DAY*meta.getNoOfQuestions())));
+        threashold=pics.length;
 
 
-        if(meta.getStartDate().get(Calendar.YEAR)<2000) {
-            meta.setStartDate(Calendar.getInstance());
-            meta.write();
-        }
-        if(meta.baselineOver){
+        if(meta.isDayTenFollowUpOver()){
             finish();
             Intent in=new Intent(getApplicationContext(),Home.class);
             startActivity(in);
@@ -86,7 +78,7 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
             public void onTick(long l) {
                 timer.setText(""+(l/1000));
                 if((l/1000)<=5){
-                   Animation animation=AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
+                    Animation animation=AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
                     timer.startAnimation(animation);
                 }else
                     timer.clearAnimation();
@@ -99,7 +91,7 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
             }
             @Override
             public void onFinish() {
-                db.updateValid(img.getTag().toString(),1);
+                db.updateDayTen(img.getTag().toString(),0);
                 setImg();
             }
         };
@@ -152,9 +144,9 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
         switch (id){
             case R.id.btn_tick :
                 stopPlayer();
-               player=MediaPlayer.create(this,R.raw.tick_sound);
+                player=MediaPlayer.create(this,R.raw.tick_sound);
                 player.start();
-                db.updateValid(img.getTag().toString(),0);
+                db.updateDayTen(img.getTag().toString(),1);
                 setImg();
                 break;
 
@@ -162,14 +154,12 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
                 stopPlayer();
                 player=MediaPlayer.create(this,R.raw.untick_sound);
                 player.start();
-                db.updateValid(img.getTag().toString(),1);
+                db.updateDayTen(img.getTag().toString(),0);
                 setImg();
                 break;
         }
     }
     void setImg(){
-
-
         if(position<threashold) {
             position++;
             txtProgress.setText(position+"/"+threashold);
@@ -177,22 +167,23 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
             r1.startAnimation(AnimationUtils.loadAnimation (getApplicationContext(),R.anim.fromright));
             countDownTimer.cancel();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                img.setImageDrawable(getDrawable(getResources().getIdentifier("train_"+ position, "drawable", getPackageName())));
+                img.setImageDrawable(getDrawable(getResources().getIdentifier(pics[position-1], "drawable", getPackageName())));
 
             } else {
-                img.setImageDrawable(getResources().getDrawable(getResources().getIdentifier("train_" + position, "drawable", getPackageName())));
+                img.setImageDrawable(getResources().getDrawable(getResources().getIdentifier(pics[position-1], "drawable", getPackageName())));
             }
-            img.setTag("train_"+position);
+            img.setTag(pics[position-1]);
             countDownTimer.start();
         }else {
-            meta.setBaselineOver(true);
+            meta.setDayTenFollowUpOver(true);
             meta.setBaselinePosition(0);
             meta.write();
-            Intent i=new Intent(getApplicationContext(),Home.class);
             if(countDownTimer!=null)
                 countDownTimer.cancel();
-            startActivity(i);
             finish();
+            Intent i=new Intent(getApplicationContext(),Home.class);
+            startActivity(i);
+
         }
     }
     void stopPlayer(){
@@ -206,11 +197,7 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(db!=null)
-            db.close();
-        if(countDownTimer!=null)
-            countDownTimer.cancel();
-        finish();
+
 
     }
 
@@ -218,10 +205,14 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
     protected void onStop() {
         super.onStop();
         stopPlayer();
-        if(!meta.isBaselineOver()) {
+        if(meta.isBaselineOver()) {
             meta.setBaselinePosition(position - 1);
             meta.write();
         }
+        if(db!=null)
+            db.close();
+        if(countDownTimer!=null)
+            countDownTimer.cancel();
     }
     @Override
     public void onBackPressed() {

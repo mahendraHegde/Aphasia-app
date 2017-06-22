@@ -55,6 +55,7 @@ public class Instructions extends AppCompatActivity {
     int index;
     Drawable d;
     ImageSpan span;
+    boolean followup=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,14 +73,43 @@ public class Instructions extends AppCompatActivity {
         }
         if(getIntent().getStringExtra("activity").contains("training"))
             training =true;
+        else if(getIntent().getStringExtra("activity").contains("followup"))
+            followup=true;
 
-
-        int last=meta.getLastDate().get(Calendar.DATE);
+            int last=meta.getLastDate().get(Calendar.DATE);
         int tod=Calendar.getInstance().get(Calendar.DATE);
         spChoice.setVisibility(View.GONE);
 
+        if(followup){
+            resource=new String(getResources().getString(R.string.followup_ins));
+            spannableString=new SpannableString(resource);
 
-        if(training){
+            index=resource.indexOf("✔");
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                d = getDrawable(R.drawable.tick_small);
+            }else {
+                d = getResources().getDrawable(R.drawable.tick_small);
+            }
+            d.setBounds(0, 0, d.getIntrinsicWidth()/10, d.getIntrinsicHeight()/10);
+            span= new ImageSpan(d, ImageSpan.ALIGN_BOTTOM);
+            spannableString.setSpan(span, index, index+1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+
+            index=resource.indexOf("@");
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                d = getDrawable(R.drawable.untick_small);
+            }else {
+                d = getResources().getDrawable(R.drawable.untick_small);
+            }
+            d.setBounds(0, 0, d.getIntrinsicWidth()/2, d.getIntrinsicHeight()/2);
+            span= new ImageSpan(d, ImageSpan.ALIGN_BOTTOM);
+            spannableString.setSpan(span, index, index+1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+
+            txtIns.setText(spannableString);
+        }
+
+        else if(training){
             if(meta.getNoOfQuestions()<=0)
                 spChoice.setVisibility(View.VISIBLE);
 
@@ -94,6 +124,8 @@ public class Instructions extends AppCompatActivity {
             }
 
             meta.write();
+
+
             if(meta.isTodayTrainingOver()){
                 new AlertDialog.Builder(this)
                         .setTitle("ಪೂರ್ಣಗೊಂಡಿದೆ")
@@ -200,8 +232,9 @@ public class Instructions extends AppCompatActivity {
             public void onClick(View view) {
                 if(training){
                     if(meta.getNoOfQuestions()>0) {
-                            startActivity(new Intent(getApplicationContext(), training.class));
-                            finish();
+                        finish();
+                        startActivity(new Intent(getApplicationContext(), training.class));
+
                         }
                     else {
                         spChoice.setVisibility(View.VISIBLE);
@@ -215,7 +248,10 @@ public class Instructions extends AppCompatActivity {
                     }
                 }else {
                     finish();
-                    startActivity(new Intent(getApplicationContext(), BaselineTest.class));
+                    if(followup)
+                        startActivity(new Intent(getApplicationContext(), FollowUp.class));
+                    else
+                        startActivity(new Intent(getApplicationContext(), BaselineTest.class));
                 }
             }
         });

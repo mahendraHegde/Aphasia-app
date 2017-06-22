@@ -1,7 +1,9 @@
 package com.example.accer.aphasia_app;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.BoringLayout;
@@ -11,10 +13,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.util.Calendar;
+
 public class Home extends AppCompatActivity {
     Button btnProgress,btnTraining;
     Boolean doubleBackToExitPressedOnce=false;
     Meta meta;
+    public static int FOLLOW_UP_DAY=10;
+    ADB db;
+    boolean isFollowUp=false;
+    Button overallProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,16 +30,42 @@ public class Home extends AppCompatActivity {
         setContentView(R.layout.activity_home);
         btnProgress=(Button) findViewById(R.id.btn_progress);
         btnTraining=(Button)findViewById(R.id.btn_training);
+        overallProgress=(Button)findViewById(R.id.btn_overall) ;
         meta=new Meta(this);
+        db=new ADB(this);
         if(meta.read()!=null)
             meta=meta.read();
 
+
+        if(meta.getLastDate().get(Calendar.DATE)!=Calendar.getInstance().get(Calendar.DATE)&&meta.getLastDate().getTimeInMillis()< Calendar.getInstance().getTimeInMillis()&&!db.checkForYesterdayTest(meta.getDay())&&meta.getDay()+1==FOLLOW_UP_DAY&&!meta.isDayTenFollowUpOver()){
+            isFollowUp=true;
+        }
+
         if(meta.isBaselineOver()) {
-            btnTraining.setText("ತರಬೇತಿ");
+            if(isFollowUp){
+                btnTraining.setText("ಅನುಸರಣಾ ಪರೀಕ್ಷೆ");
+            }else {
+                btnTraining.setText("ತರಬೇತಿ");
+                if(db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions()).length<=0){
+                    new AlertDialog.Builder(this)
+                            .setTitle("ಪೂರ್ಣಗೊಂಡಿದೆ")
+                            .setMessage("ನಿಮ್ಮ ತರಬೇತಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ.\n" +
+                                    "ನೀವು ಗುಣಮುಖರಾಗಿದ್ದೀರಿ ಎಂದು ಭಾವಿಸುತ್ತೇವೆ.\n" +
+                                    "ಧನ್ಯವಾದಗಳು ..")
+                            .setPositiveButton("ಸರಿ", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                   dialogInterface.dismiss();
+                                }
+                            })
+                            .show();
+                }
+            }
         }else {
             btnTraining.setText("ಬೇಸ್ಲೈನ್ ಟೆಸ್ಟ್");
         }
         btnProgress.setText("ಪ್ರಗತಿ");
+
 
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -51,9 +85,19 @@ public class Home extends AppCompatActivity {
         lp.height= (int) (height*.35);
         btnTraining.setLayoutParams(lp);
 
-       /* finish();
-        startActivity(new Intent(getApplicationContext(),Progress.class));
-*/
+
+        lp=overallProgress.getLayoutParams();
+        lp.width= (int) (width*.20);
+        lp.height= (int) (height*.29);
+        overallProgress.setLayoutParams(lp);
+
+        overallProgress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(),OverallReport.class));
+            }
+        });
+
         btnProgress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,9 +112,12 @@ public class Home extends AppCompatActivity {
                 finish();
                 Intent in=new Intent(getApplicationContext(),Instructions.class);
                 if(meta.isBaselineOver()) {
-                    in.putExtra("activity", "training");
+                    if(isFollowUp){
+                        in.putExtra("activity", "followup");
+                    }else
+                     in.putExtra("activity", "training");
                 }else {
-                    in.putExtra("activity", "baseline");
+                        in.putExtra("activity", "baseline");
                 }
                 startActivity(in);
 

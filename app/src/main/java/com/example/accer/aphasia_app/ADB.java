@@ -38,7 +38,8 @@ public class ADB extends SQLiteOpenHelper {
         String createData="create table  "+TABLE_DATA+" ( " +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "+
                 "pic TEXT UNIQUE NOT NULL," +
-                "valid INTEGER DEFAULT 1" +
+                "valid INTEGER DEFAULT 1," +
+                "dayten INTEGER DEFAULT -1" +
                 ")";
         db.execSQL(createData);
 
@@ -118,6 +119,11 @@ public class ADB extends SQLiteOpenHelper {
 
     }
 
+    public int[] getSuccessFailArray(){
+        int arr[]=new int[2];
+    }
+
+
     public boolean checkForYesterdayTest(int day){
         int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
         String limit=(day*noOfQuestions)+","+noOfQuestions;
@@ -153,6 +159,13 @@ public class ADB extends SQLiteOpenHelper {
         values.put("valid",valid);
         return  db.update(TABLE_DATA,values,"pic=?",new String[]{pic})>0;
     }
+    public boolean updateDayTen(String pic,int dayten){
+        SQLiteDatabase db=this.getWritableDatabase();
+        ContentValues values=new ContentValues();
+        values.put("dayten",dayten);
+        return  db.update(TABLE_DATA,values,"pic=?",new String[]{pic})>0;
+    }
+
     public ArrayList<Collect> getData(){
         SQLiteDatabase db=this.getReadableDatabase();
         Cursor cursor=db.query(TABLE_DATA,new String[] {"id","pic","valid"},null,null,null,null,null);

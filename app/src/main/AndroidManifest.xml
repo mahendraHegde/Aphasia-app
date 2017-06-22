@@ -45,9 +45,7 @@
             android:name=".Home"
             android:configChanges="orientation|screenSize"
             android:exported="true"
-            android:screenOrientation="landscape">
-
-        </activity>
+            android:screenOrientation="landscape"></activity>
         <activity
             android:name=".DailyReport"
             android:configChanges="orientation|screenSize"
@@ -58,12 +56,12 @@
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:screenOrientation="landscape" />
-        <activity android:name=".OverallReport"
+        <activity
+            android:name=".OverallReport"
             android:configChanges="orientation|screenSize"
             android:exported="true"
-            android:screenOrientation="landscape" >
-
-        </activity>
+            android:screenOrientation="landscape"></activity>
+        <activity android:name=".FollowUp"></activity>
     </application>
 
 </manifest>

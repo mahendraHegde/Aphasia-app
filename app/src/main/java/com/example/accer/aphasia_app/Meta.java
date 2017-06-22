@@ -35,6 +35,7 @@ public  class Meta implements Serializable {
     private boolean dailyPicsOver;//check whether to repeat failed attempt or to continue with regular pics
     private boolean failedLooping;
     private int maxGivenTimeElapsed;
+    private boolean dayTenFollowUpOver;
    static Context ctx;
     Meta(Context c){
         ctx=c;
@@ -52,8 +53,18 @@ public  class Meta implements Serializable {
         dailyPicsOver=false;
         failedLooping=false;
         maxGivenTimeElapsed =0;
+        dayTenFollowUpOver=false;
+
         setCalendar();
 
+    }
+
+    public boolean isDayTenFollowUpOver() {
+        return dayTenFollowUpOver;
+    }
+
+    public void setDayTenFollowUpOver(boolean dayTenFollowUpOver) {
+        this.dayTenFollowUpOver = dayTenFollowUpOver;
     }
 
     public int getMaxGivenTimeElapsed() {

@@ -30,12 +30,12 @@ import java.util.ArrayList;
 public class OverallReport extends AppCompatActivity {
 
     private PieChart mChart1;
-    private SeekBar mSeekBarX, mSeekBarY;
-    private TextView tvX, tvY;
+    ADB db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overall_report);
+        db=new ADB(this);
 
         mChart1 =(PieChart)findViewById(R.id.pieChart);
         mChart1.setUsePercentValues(false);
