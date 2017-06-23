@@ -15,6 +15,7 @@ import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import java.util.Map;
@@ -154,4 +155,5 @@ public class GetVolleyResponse {
         };
         MySingleton.getInstance(ctx).addToRequestQueue(stringRequest);
     }
+
 }

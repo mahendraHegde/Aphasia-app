@@ -13,15 +13,22 @@ import android.os.Bundle;
 import android.text.BoringLayout;
 import android.text.Html;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Home extends AppCompatActivity {
     Button btnProgress,btnTraining;
@@ -31,7 +38,8 @@ public class Home extends AppCompatActivity {
     ADB db;
     boolean isFollowUp=false;
     Button overallProgress;
-    ObjectAnimator anim=null;
+    Button btnSendReports;
+    public static final String SERVER_URL="10.0.0.2:8081/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +48,7 @@ public class Home extends AppCompatActivity {
         btnProgress=(Button) findViewById(R.id.btn_progress);
         btnTraining=(Button)findViewById(R.id.btn_training);
         overallProgress=(Button)findViewById(R.id.btn_overall) ;
+        btnSendReports=(Button)findViewById(R.id.btn_send_reports);
         meta=new Meta(this);
         db=new ADB(this);
         if(meta.read()!=null)
@@ -99,6 +108,11 @@ public class Home extends AppCompatActivity {
         lp.width= (int) (width*.20);
         lp.height= (int) (height*.29);
         overallProgress.setLayoutParams(lp);
+
+        lp=btnSendReports.getLayoutParams();
+        lp.width= (int) (width*.20);
+        lp.height= (int) (height*.29);
+        btnSendReports.setLayoutParams(lp);
 
         if(meta.getFollowUpDay()<=0)
             askFollowUp();
@@ -161,6 +175,18 @@ public class Home extends AppCompatActivity {
         });
 
 
+        btnSendReports.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    sendReports();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
     }
 
     @Override
@@ -200,25 +226,98 @@ public class Home extends AppCompatActivity {
                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialogInterface) {
-                        anim=ObjectAnimator.ofPropertyValuesHolder(this,
-                                PropertyValuesHolder.ofFloat("scaleX",1.2f),
-                                PropertyValuesHolder.ofFloat("scaleY",1.2f));
-                        anim.setDuration(1000);
-                        anim.setRepeatCount(ObjectAnimator.INFINITE);
-                        anim.setRepeatMode(ObjectAnimator.REVERSE);
-                        anim.start();
                        askFollowUp();
                     }
                 })
                 .setAdapter(adapter, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(anim!=null)
-                            anim.cancel();
                         meta.setFollowUpDay((which+1)*5);
                         meta.write();
                         dialog.dismiss();
                     }
                 }).create().show();
     }
+
+
+    void sendReports() throws JSONException {
+
+
+        Map<String, String> params = new HashMap<>();
+        params.put("patient_id","100");
+        params.put("transaction",getTrans());
+        params.put("followup",getFollowUp());
+        final GetVolleyResponse response=new GetVolleyResponse(Home.this);
+        response.getResponse(SERVER_URL, params, new VolleyCallback() {
+            @Override
+            public void onSuccessResponse(String result) {
+                JSONArray jsonArray = null;
+                try {
+                    jsonArray = new JSONArray(result);
+                    JSONObject jsonObject = jsonArray.getJSONObject(0);
+                    String code = jsonObject.getString("code").toLowerCase();
+                    String message = jsonObject.getString("message");
+                    if (code.contains("success")) {
+                        Toast.makeText(getApplicationContext(), "Thank you for your feedback", Toast.LENGTH_LONG).show();
+
+                    } else {
+                        Toast.makeText(getApplicationContext(), "sdhjaksd", Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+
+/*        new AlertDialog.Builder(Home.this)
+                .setMessage(trnsactionString)
+                .show();
+        Log.i("Jsonn",trnsactionString);*/
+    }
+    String getTrans() throws JSONException {
+        ArrayList<ADB.Transactions> list;
+        JSONArray array=new JSONArray();
+        JSONObject obj=new JSONObject();
+        list=db.getTransactions();
+        for (int i=0;i<list.size();i++){
+            ADB.Transactions t=list.get(i);
+            JSONObject tempObj=new JSONObject();
+            tempObj.put("type",t.getType());
+            tempObj.put("attempt_id",t.getAttempt_id());
+            tempObj.put("pic_id",t.getPic_id());
+            tempObj.put("cue1",t.getCue1());
+            tempObj.put("cue2",t.getCue2());
+            tempObj.put("cue3",t.getCue3());
+            tempObj.put("cue4",t.getCue4());
+            tempObj.put("time",t.getTime());
+            tempObj.put("day",t.getDay());
+
+
+            array.put(tempObj);
+        }
+        obj.put("transactions",array);
+        return obj.toString();
+    }
+
+
+    String getFollowUp() throws JSONException {
+        ArrayList<ADB.Record> list;
+        JSONArray array=new JSONArray();
+        JSONObject obj=new JSONObject();
+        list=db.getFollowUp();
+        for (int i=0;i<list.size();i++){
+            ADB.Record t=list.get(i);
+            JSONObject tempObj=new JSONObject();
+            tempObj.put("id",t.getId());
+            tempObj.put("dayten",t.getDayten());
+
+            array.put(tempObj);
+        }
+        obj.put("followup",array);
+        return obj.toString();
+    }
+
+
 }

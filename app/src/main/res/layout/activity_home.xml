@@ -57,4 +57,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="8dp" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ವರದಿಗಳನ್ನು ಕಳುಹಿಸಿ\n"
+        android:background="@drawable/talk_button"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#fff"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:id="@+id/btn_send_reports" />
+
 </android.support.constraint.ConstraintLayout>

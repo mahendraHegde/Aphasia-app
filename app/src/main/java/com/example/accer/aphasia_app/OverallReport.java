@@ -46,15 +46,15 @@ public class OverallReport extends AppCompatActivity {
 
         mChart1.setDragDecelerationFrictionCoef(0.95f);
 
-        mChart1.setCenterText(generateCenterSpannableText());
+        //mChart1.setCenterText(generateCenterSpannableText());
 
-        mChart1.setDrawHoleEnabled(true);
-        mChart1.setHoleColor(Color.WHITE);
+        mChart1.setDrawHoleEnabled(false);
+        //mChart1.setHoleColor(Color.WHITE);
 
         mChart1.setTransparentCircleColor(Color.WHITE);
         mChart1.setTransparentCircleAlpha(110);
 
-        mChart1.setHoleRadius(58f);
+        mChart1.setHoleRadius(0f);
         mChart1.setTransparentCircleRadius(61f);
 
         mChart1.setDrawCenterText(true);
@@ -123,13 +123,13 @@ public class OverallReport extends AppCompatActivity {
 
         mChart1.invalidate();
     }
-    private SpannableString generateCenterSpannableText() {
+/*    private SpannableString generateCenterSpannableText() {
 
         SpannableString s = new SpannableString("ಯಶಸ್ಸು - ವೈಫಲ್ಯ\nವರದಿ");
         s.setSpan(new RelativeSizeSpan(1.7f), 0, 14, 0);
         s.setSpan(new StyleSpan(Typeface.NORMAL), 14, s.length(), 0);
         return s;
-    }
+    }*/
 }
 class MyValueFormatter implements IValueFormatter {
 

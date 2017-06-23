@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.design.widget.TabLayout;
+import android.support.transition.Transition;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -52,12 +53,14 @@ public class ADB extends SQLiteOpenHelper {
                 "cue3 INTGER DEFAULT 0," +
                 "cue4 INTGER DEFAULT 0," +
                 "time TEXT," +
+                "day Integer DEFAULT 0," +
                 "PRIMARY KEY (type,attempt_id,pic_id)"+
                 ")";
        // db.execSQL("PRAGMA foreign_keys=ON");
         db.execSQL(createTransactions);
 
     }
+
 
 
     @Override
@@ -85,6 +88,8 @@ public class ADB extends SQLiteOpenHelper {
 
     public void addTransaction(int type,int attempt,int pic_id,int cue1,int cue2,int cue3,int cue4,String time){
         SQLiteDatabase db=this.getWritableDatabase();
+        int day=new Meta(ctx).read().getDay();
+        day++;
         ContentValues values=new ContentValues();
         values.put("type",type);
         values.put("attempt_id",attempt);
@@ -94,10 +99,11 @@ public class ADB extends SQLiteOpenHelper {
         values.put("cue3",cue3);
         values.put("cue4",cue4);
         values.put("time",time);
+        values.put("day",day);
         try {
             db.insertOrThrow(TABLE_TRANSACTIONS,null,values);
         }catch (SQLiteConstraintException ex){
-            db.execSQL("update "+TABLE_TRANSACTIONS+" set cue1=cue1+"+cue1+ ",cue2=cue2+"+cue2+",cue3=cue3+"+cue3+",cue4=cue4+"+cue4+",time=? where type="+type+" and attempt_id="+attempt+" and pic_id="+pic_id,new String[]{time});
+            db.execSQL("update "+TABLE_TRANSACTIONS+" set cue1=cue1+"+cue1+ ",cue2=cue2+"+cue2+",cue3=cue3+"+cue3+",cue4=cue4+"+cue4+",time=?,day=? where type="+type+" and attempt_id="+attempt+" and pic_id="+pic_id,new String[]{time,""+day});
         }finally {
             db.close();
 
@@ -145,6 +151,7 @@ public class ADB extends SQLiteOpenHelper {
         }
         return arr;
     }
+
 
 
     public boolean checkForYesterdayTest(int day){
@@ -201,15 +208,6 @@ public class ADB extends SQLiteOpenHelper {
         return list;
     }
 
-    public String query(String q){
-        SQLiteDatabase db=this.getWritableDatabase();
-        Cursor cursor=db.query(TABLE_DATA,new String[]{q},null,null,null,null,null);
-        String result=null;
-        if(cursor.moveToFirst()){
-            result=cursor.getString(0);
-        }
-        return result;
-    }
 
 
     public ArrayList<Collect> getData(String field,String val){
@@ -222,6 +220,43 @@ public class ADB extends SQLiteOpenHelper {
             }while(cursor.moveToNext());
         }
         db.close();
+        return list;
+    }
+
+    public ArrayList<Record> getFollowUp(){
+        SQLiteDatabase db=this.getReadableDatabase();
+        Cursor cursor=db.rawQuery("select id,dayten from "+TABLE_DATA+" where dayten=? or dayten=?",new String[]{"1","0"});
+        ArrayList<Record> list=new ArrayList<>();
+        if(cursor.moveToFirst()){
+            do{
+                list.add(new Record(cursor.getInt(1),cursor.getInt(0)));
+            }while(cursor.moveToNext());
+        }
+        db.close();
+        return list;
+    }
+
+    public ArrayList<Transactions>getTransactions(){
+
+        ArrayList<Transactions>list=new ArrayList<Transactions>();
+        SQLiteDatabase db=this.getReadableDatabase();
+        try {
+
+            Cursor c=db.query(TABLE_TRANSACTIONS,new String[]{"type","attempt_id","pic_id","cue1","cue2","cue3","cue4","time","day"},null,null,null,null,null);
+            if(c.moveToFirst()){
+
+                do{
+                    list.add(new Transactions(c.getInt(0),c.getInt(1),c.getInt(2),c.getInt(3),c.getInt(4),c.getInt(5),c.getInt(6),c.getString(7),c.getInt(8)));
+                }while (c.moveToNext());
+
+            }else
+                return list;
+
+        }catch (Exception e){
+            return list;
+        }finally {
+            db.close();
+        }
         return list;
 
     }
@@ -328,6 +363,109 @@ public class ADB extends SQLiteOpenHelper {
 
         public int getValid() {
             return valid;
+        }
+    }
+
+    class Transactions{
+        private int type,attempt_id,pic_id,cue1,cue2,cue3,cue4,day;
+        private String time;
+        Transactions(int type,int attempt_id,int pic_id,int cue1,int cue2,int cue3,int cue4,String time,int day){
+            this.type=type;
+            this.attempt_id=attempt_id;
+            this.pic_id=pic_id;
+            this.cue1=cue1;
+            this.cue2=cue2;
+            this.cue3=cue3;
+            this.cue4=cue4;
+            this.time=time;
+            this.day=day;
+        }
+
+        public int getDay() {
+            return day;
+        }
+
+        public void setDay(int day) {
+            this.day = day;
+        }
+
+        public int getType() {
+            return type;
+        }
+
+        public void setType(int type) {
+            this.type = type;
+        }
+
+        public int getAttempt_id() {
+            return attempt_id;
+        }
+
+        public void setAttempt_id(int attempt_id) {
+            this.attempt_id = attempt_id;
+        }
+
+        public int getPic_id() {
+            return pic_id;
+        }
+
+        public void setPic_id(int pic_id) {
+            this.pic_id = pic_id;
+        }
+
+        public int getCue1() {
+            return cue1;
+        }
+
+        public void setCue1(int cue1) {
+            this.cue1 = cue1;
+        }
+
+        public int getCue2() {
+            return cue2;
+        }
+
+        public void setCue2(int cue2) {
+            this.cue2 = cue2;
+        }
+
+        public int getCue3() {
+            return cue3;
+        }
+
+        public void setCue3(int cue3) {
+            this.cue3 = cue3;
+        }
+
+        public int getCue4() {
+            return cue4;
+        }
+
+        public void setCue4(int cue4) {
+            this.cue4 = cue4;
+        }
+
+        public String getTime() {
+            return time;
+        }
+
+        public void setTime(String time) {
+            this.time = time;
+        }
+    }
+    class Record{
+        int dayten,id;
+        Record(int dayten,int id){
+            this.dayten=dayten;
+            this.id=id;
+        }
+
+        public int getDayten() {
+            return dayten;
+        }
+
+        public int getId() {
+            return id;
         }
     }
 }
