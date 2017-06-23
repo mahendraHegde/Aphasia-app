@@ -36,6 +36,7 @@ public  class Meta implements Serializable {
     private boolean failedLooping;
     private int maxGivenTimeElapsed;
     private boolean dayTenFollowUpOver;
+    private int followUpDay;
    static Context ctx;
     Meta(Context c){
         ctx=c;
@@ -54,9 +55,18 @@ public  class Meta implements Serializable {
         failedLooping=false;
         maxGivenTimeElapsed =0;
         dayTenFollowUpOver=false;
+        followUpDay=0;
 
         setCalendar();
 
+    }
+
+    public int getFollowUpDay() {
+        return followUpDay;
+    }
+
+    public void setFollowUpDay(int followUpDay) {
+        this.followUpDay = followUpDay;
     }
 
     public boolean isDayTenFollowUpOver() {

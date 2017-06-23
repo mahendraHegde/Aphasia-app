@@ -1,19 +1,27 @@
 package com.example.accer.aphasia_app;
 
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.BoringLayout;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class Home extends AppCompatActivity {
     Button btnProgress,btnTraining;
@@ -23,6 +31,7 @@ public class Home extends AppCompatActivity {
     ADB db;
     boolean isFollowUp=false;
     Button overallProgress;
+    ObjectAnimator anim=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +52,10 @@ public class Home extends AppCompatActivity {
 
         if(meta.isBaselineOver()) {
             if(isFollowUp){
-                btnTraining.setText("ಅನುಸರಣಾ ಪರೀಕ್ಷೆ");
+                btnTraining.setText("ಅನುಸರಣಾ ಪರೀಕ್ಷೆ\n");
             }else {
-                btnTraining.setText("ತರಬೇತಿ");
-                if(db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions()).length<=0){
+                btnTraining.setText("ತರಬೇತಿ\n");
+                if((meta.getDay()>0&&db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions()).length<=0)||(db.getDataPics("valid","1").length<=0)){
                     new AlertDialog.Builder(this)
                             .setTitle("ಪೂರ್ಣಗೊಂಡಿದೆ")
                             .setMessage("ನಿಮ್ಮ ತರಬೇತಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ.\n" +
@@ -62,9 +71,9 @@ public class Home extends AppCompatActivity {
                 }
             }
         }else {
-            btnTraining.setText("ಬೇಸ್ಲೈನ್ ಟೆಸ್ಟ್");
+            btnTraining.setText("ಬೇಸ್ಲೈನ್ ಟೆಸ್ಟ್\n");
         }
-        btnProgress.setText("ಪ್ರಗತಿ");
+        btnProgress.setText("ಪ್ರಗತಿ\n");
 
 
 
@@ -91,10 +100,21 @@ public class Home extends AppCompatActivity {
         lp.height= (int) (height*.29);
         overallProgress.setLayoutParams(lp);
 
+        if(meta.getFollowUpDay()<=0)
+            askFollowUp();
+        else
+            FOLLOW_UP_DAY=meta.getFollowUpDay();
+
         overallProgress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(),OverallReport.class));
+                int arr[]=db.getSuccessFailTransactionArray();
+                if(arr[1]<=0){
+                    Snackbar.make(findViewById(R.id.constraint_home),"ತರಬೇತಿ ಇನ್ನೂ ಪ್ರಾರಂಭಿಸಿಲ್ಲ.",Snackbar.LENGTH_LONG).show();
+                }else {
+                    Intent i=new Intent(getApplicationContext(), OverallReport.class);
+                    startActivity(i);
+                }
             }
         });
 
@@ -114,8 +134,24 @@ public class Home extends AppCompatActivity {
                 if(meta.isBaselineOver()) {
                     if(isFollowUp){
                         in.putExtra("activity", "followup");
-                    }else
-                     in.putExtra("activity", "training");
+                    }else {
+                        in.putExtra("activity", "training");
+                        if((meta.getDay()>0&&db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions()).length<=0)||(db.getDataPics("valid","1").length<=0)){
+                            new AlertDialog.Builder(Home.this)
+                                    .setTitle("ಪೂರ್ಣಗೊಂಡಿದೆ")
+                                    .setMessage("ನಿಮ್ಮ ತರಬೇತಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ.\n" +
+                                            "ನೀವು ಗುಣಮುಖರಾಗಿದ್ದೀರಿ ಎಂದು ಭಾವಿಸುತ್ತೇವೆ.\n" +
+                                            "ಧನ್ಯವಾದಗಳು ..")
+                                    .setPositiveButton("ಸರಿ", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            dialogInterface.dismiss();
+                                        }
+                                    })
+                                    .show();
+                            in=new Intent(getApplicationContext(),Home.class);
+                        }
+                    }
                 }else {
                         in.putExtra("activity", "baseline");
                 }
@@ -147,5 +183,42 @@ public class Home extends AppCompatActivity {
             }
         }, 2000);
 
+    }
+
+
+    void askFollowUp(){
+        List<String>list=new ArrayList<String>();
+        for(int i=5;i<=30;i=i+5){
+            list.add("On Day "+i);
+        }
+
+       ArrayAdapter<String> adapter=new ArrayAdapter<String>(this,android.R.layout.select_dialog_item,list);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        new AlertDialog.Builder(Home.this)
+                .setTitle("please select follow up test day for your study(Doctors Only)")
+                .setCancelable(false)
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        anim=ObjectAnimator.ofPropertyValuesHolder(this,
+                                PropertyValuesHolder.ofFloat("scaleX",1.2f),
+                                PropertyValuesHolder.ofFloat("scaleY",1.2f));
+                        anim.setDuration(1000);
+                        anim.setRepeatCount(ObjectAnimator.INFINITE);
+                        anim.setRepeatMode(ObjectAnimator.REVERSE);
+                        anim.start();
+                       askFollowUp();
+                    }
+                })
+                .setAdapter(adapter, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(anim!=null)
+                            anim.cancel();
+                        meta.setFollowUpDay((which+1)*5);
+                        meta.write();
+                        dialog.dismiss();
+                    }
+                }).create().show();
     }
 }

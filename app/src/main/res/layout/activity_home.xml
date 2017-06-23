@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.accer.aphasia_app.Home"
-    android:background="@drawable/home_background">
+    android:background="@drawable/home_background"
+    android:id="@+id/constraint_home">
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -45,7 +46,7 @@
     <Button
         android:layout_width="100dp"
         android:layout_height="86dp"
-        android:text="Overall Report"
+        android:text="ಒಟ್ಟಾರೆ ವರದಿ\n"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="#fff"

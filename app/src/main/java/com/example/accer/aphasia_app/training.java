@@ -43,7 +43,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
     PowerManager pm;
     PowerManager.WakeLock wl;
     int position=-1;
-    int interval=2,maxGivenTime=25,ctr;
+    int interval=20,maxGivenTime=25,ctr;
     final int maxGivenTimeConstant=25;
     int threashold=0;
     static  MediaPlayer player;
@@ -277,6 +277,12 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                 player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mediaPlayer) {
+                        if(ctr<=3) {
+                            btnc1.setEnabled(false);
+                            btnc2.setEnabled(false);
+                            btnc3.setEnabled(false);
+                            btnc4.setEnabled(false);
+                        }
                         switch (ctr-1){
                             case 1:
                                 cue1=1;
@@ -310,10 +316,11 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                     }
                 });
                 ctr++;
-                if (ctr <4)
-                    handler.postDelayed(this, (interval * 1000)+player.getDuration());
+                if (ctr <4) {
+                    handler.postDelayed(this, (interval * 1000) + player.getDuration());
+                }
                 else if(ctr==4) {
-                    handler.postDelayed(this, (1000 * 10/*30*/)+player.getDuration());//after 3rd cue gets over
+                    handler.postDelayed(this, (1000 * ((interval/2)+interval))+player.getDuration());//after 3rd cue gets over
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -321,13 +328,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
                             btnc2.setEnabled(true);
                             btnc3.setEnabled(true);
                         }
-                    },10*1000);
-/*                      new Handler().postDelayed(new Runnable() {
-                          @Override
-                          public void run() {
-                              btnc4.setEnabled(true);
-                          }
-                      },1000*30);*/
+                    },player.getDuration()-player.getCurrentPosition());
 
                 }
                 else if(position<=threashold-1) {

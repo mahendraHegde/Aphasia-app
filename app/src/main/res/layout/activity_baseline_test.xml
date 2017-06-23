@@ -111,10 +111,10 @@
         android:text="hello"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="-47dp"
-        android:layout_marginRight="-25dp"
+        android:layout_marginRight="-30dp"
         app:layout_constraintRight_toRightOf="parent"
         android:textStyle="bold"
-        android:textSize="20sp"/>
+        android:textSize="25sp"/>
 
 
 </android.support.constraint.ConstraintLayout>

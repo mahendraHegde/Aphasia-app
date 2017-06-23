@@ -105,22 +105,45 @@ public class ADB extends SQLiteOpenHelper {
     }
 
     public  int getSuccessfulPicsCount(int day){
+        SQLiteDatabase db=this.getReadableDatabase();
         try {
             int noOfQuestions=new Meta(ctx).read().getNoOfQuestions();
-            SQLiteDatabase db=this.getReadableDatabase();
+
             String limit=(day*noOfQuestions)+","+noOfQuestions;
             Cursor cursor=db.rawQuery("select count(pic_id) from "+TABLE_TRANSACTIONS +" where type=? and cue4=? and attempt_id=? and pic_id in(select id from "+TABLE_DATA+" where valid=? limit "+limit+") ",new String[]{"0","0","1","1"});
             cursor.moveToFirst();
             return cursor.getInt(0);
         }catch (Exception e){
             Toast.makeText(ctx,"Training has not started yet..",Toast.LENGTH_LONG).show();
+        }finally {
+            db.close();
         }
        return 0;
 
     }
 
-    public int[] getSuccessFailArray(){
-        int arr[]=new int[2];
+    public int[] getSuccessFailTransactionArray(){
+        int arr[]={0,0};
+        SQLiteDatabase db=this.getReadableDatabase();
+        try{
+            Cursor cursor=db.query(TABLE_TRANSACTIONS,new String[]{"count(*)"},"cue4=?",new String[]{"1"},null,null,null,null);
+            if(cursor.moveToFirst()){
+                arr[0]=cursor.getInt(0);
+            }else {
+                arr[0]=0;
+            }
+            cursor=db.query(TABLE_TRANSACTIONS,new String[]{"count(*)"},null,null,null,null,null,null);
+            if(cursor.moveToFirst()){
+                arr[1]=cursor.getInt(0);
+            }else {
+                arr[1]=0;
+            }
+        }catch (Exception e){
+            return arr;
+        }finally {
+            db.close();
+        }
+        return arr;
     }
 
 

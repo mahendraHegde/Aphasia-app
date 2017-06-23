@@ -140,7 +140,7 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
 
         lp=progressBar.getLayoutParams();
         lp.width= (int) (width*.25);
-        lp.height= (int) (height*.15);
+        lp.height= (int) (height*.21);
         progressBar.setLayoutParams(lp);
         progressBar.invalidate();
 

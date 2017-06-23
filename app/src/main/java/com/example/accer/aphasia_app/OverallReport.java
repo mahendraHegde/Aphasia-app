@@ -2,6 +2,7 @@ package com.example.accer.aphasia_app;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -31,6 +32,7 @@ public class OverallReport extends AppCompatActivity {
 
     private PieChart mChart1;
     ADB db;
+    int arr[];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,9 +87,12 @@ public class OverallReport extends AppCompatActivity {
 
         // NOTE: The order of the entries when being added to the entries array determines their position around the center of
         // the chart.
-
-        entries.add(new PieEntry(20,"ಯಶಸ್ವಿ"));
-        entries.add(new PieEntry(10,"ವಿಫಲವಾಗಿದೆ"));
+        arr=db.getSuccessFailTransactionArray();
+        if (arr[1]<=0){
+            finish();
+        }
+        entries.add(new PieEntry(arr[1]-arr[0],"ಯಶಸ್ವಿ"));
+        entries.add(new PieEntry(arr[0],"ವಿಫಲವಾಗಿದೆ"));
 
 
         PieDataSet dataSet = new PieDataSet(entries,"ಒಟ್ಟಾರೆ ಪ್ರಗತಿ");
