@@ -237,12 +237,14 @@ public class ADB extends SQLiteOpenHelper {
     }
 
     public ArrayList<Transactions>getTransactions(){
-
         ArrayList<Transactions>list=new ArrayList<Transactions>();
         SQLiteDatabase db=this.getReadableDatabase();
+        long cnt  = DatabaseUtils.queryNumEntries(db, TABLE_TRANSACTIONS);
+        long sentCount=new Meta(ctx).read().getCountOfTransactionsSent();
+        String limit=sentCount+","+(cnt-sentCount);
         try {
 
-            Cursor c=db.query(TABLE_TRANSACTIONS,new String[]{"type","attempt_id","pic_id","cue1","cue2","cue3","cue4","time","day"},null,null,null,null,null);
+            Cursor c=db.query(TABLE_TRANSACTIONS,new String[]{"type","attempt_id","pic_id","cue1","cue2","cue3","cue4","time","day"},null,null,null,null,null,limit);
             if(c.moveToFirst()){
 
                 do{

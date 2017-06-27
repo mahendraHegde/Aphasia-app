@@ -6,13 +6,29 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +42,14 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
     int permission;
+    AlertDialog alert;
+    LayoutInflater inflater;
+    View v;
+    EditText patId;
+    Button btnLogin;
+
+    public static final String SERVER_URL="http://10.0.2.2:8081/Aphasia-web/";
+    public static String LOGIN_URL="patientlogin.php";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,8 +90,7 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .show();
         }else{
-            startActivity(new Intent(this, Home.class));
-
+           login();
         }
     }
     void askPermission(){
@@ -136,4 +159,80 @@ public class MainActivity extends AppCompatActivity {
         if(db!=null)
             db.close();
     }
+
+
+    void login(){
+        if(meta.getPatientId()==null) {
+            if (alert == null)
+                alert = getBuilder().create();
+            alert.setCanceledOnTouchOutside(false);
+            alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    MainActivity.this.finish();
+                }
+            });
+            alert.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialogInterface) {
+                    MainActivity.this.finish();
+                }
+            });
+            alert.show();
+        }
+        else
+            startActivity(new Intent(this, Home.class));
+
+    }
+
+    @NonNull
+    private AlertDialog.Builder getBuilder() {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        inflater = MainActivity.this.getLayoutInflater();
+        if (v == null) {
+            v = inflater.inflate(R.layout.login, null, false);
+        } else {
+            ((ViewGroup) v.getParent()).removeView(v);
+        }
+        alert.setView(v);
+
+        patId = (EditText) v.findViewById(R.id.patient_id);
+        btnLogin = (Button) v.findViewById(R.id.btn_login);
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(!patId.getText().toString().isEmpty()){
+                    Map<String, String> params = new HashMap<>();
+                    params.put("patient_id", patId.getText().toString());
+                    final GetVolleyResponse response = new GetVolleyResponse(MainActivity.this);
+                    response.getResponse(SERVER_URL + LOGIN_URL, params, new VolleyCallback() {
+                        @Override
+                        public void onSuccessResponse(String result) {
+                            JSONArray jsonArray = null;
+                            try {
+                                jsonArray = new JSONArray(result);
+                                JSONObject jsonObject = jsonArray.getJSONObject(0);
+                                String code = jsonObject.getString("code").toLowerCase();
+                                if (code.contains("success")) {
+                                    MainActivity.this.finish();
+                                    startActivity(new Intent(MainActivity.this, Home.class));
+
+                                } else {
+                                    Snackbar snack = Snackbar.make(v, "Inavlid Patient Id", Snackbar.LENGTH_LONG);
+                                    snack.show();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                }else {
+                    Snackbar snack = Snackbar.make(v, "Please provide Patient Id", Snackbar.LENGTH_LONG);
+                    snack.show();
+                }
+            }
+        });
+        return alert;
+    }
+
 }

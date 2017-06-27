@@ -547,6 +547,7 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         meta.setTrainingPosition(position-1);
         meta.setLastDate(todayDate);
         meta.write();
+        startService(new Intent(this,SendData.class));
     }
 
     void cleanUp(){

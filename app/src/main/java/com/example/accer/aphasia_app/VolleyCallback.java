@@ -6,4 +6,5 @@ package com.example.accer.aphasia_app;
 
 public interface VolleyCallback {
     void onSuccessResponse(String result);
+    //void onErrorResponse(String error);
 }

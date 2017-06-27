@@ -39,7 +39,9 @@ public class Home extends AppCompatActivity {
     boolean isFollowUp=false;
     Button overallProgress;
     Button btnSendReports;
-    public static final String SERVER_URL="10.0.0.2:8081/";
+    public static final String SERVER_URL="http://10.0.2.2:8081/Aphasia-web/";
+    public static final String TRANSACTION_URL="synctransactions.php";
+    int sentCount=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,36 +57,7 @@ public class Home extends AppCompatActivity {
             meta=meta.read();
 
 
-        if(meta.getLastDate().get(Calendar.DATE)!=Calendar.getInstance().get(Calendar.DATE)&&meta.getLastDate().getTimeInMillis()< Calendar.getInstance().getTimeInMillis()&&!db.checkForYesterdayTest(meta.getDay())&&meta.getDay()+1==FOLLOW_UP_DAY&&!meta.isDayTenFollowUpOver()){
-            isFollowUp=true;
-        }
-
-        if(meta.isBaselineOver()) {
-            if(isFollowUp){
-                btnTraining.setText("ಅನುಸರಣಾ ಪರೀಕ್ಷೆ\n");
-            }else {
-                btnTraining.setText("ತರಬೇತಿ\n");
-                if((meta.getDay()>0&&db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions()).length<=0)||(db.getDataPics("valid","1").length<=0)){
-                    new AlertDialog.Builder(this)
-                            .setTitle("ಪೂರ್ಣಗೊಂಡಿದೆ")
-                            .setMessage("ನಿಮ್ಮ ತರಬೇತಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ.\n" +
-                                    "ನೀವು ಗುಣಮುಖರಾಗಿದ್ದೀರಿ ಎಂದು ಭಾವಿಸುತ್ತೇವೆ.\n" +
-                                    "ಧನ್ಯವಾದಗಳು ..")
-                            .setPositiveButton("ಸರಿ", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                   dialogInterface.dismiss();
-                                }
-                            })
-                            .show();
-                }
-            }
-        }else {
-            btnTraining.setText("ಬೇಸ್ಲೈನ್ ಟೆಸ್ಟ್\n");
-        }
         btnProgress.setText("ಪ್ರಗತಿ\n");
-
-
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -118,6 +91,34 @@ public class Home extends AppCompatActivity {
             askFollowUp();
         else
             FOLLOW_UP_DAY=meta.getFollowUpDay();
+
+        if(meta.getDay()+1==FOLLOW_UP_DAY&&!meta.isDayTenFollowUpOver()&&meta.isTodayTrainingOver()){
+            isFollowUp=true;
+        }
+
+        if(meta.isBaselineOver()) {
+            if(isFollowUp){
+                btnTraining.setText("ಅನುಸರಣಾ ಪರೀಕ್ಷೆ\n");
+            }else {
+                btnTraining.setText("ತರಬೇತಿ\n");
+                if((meta.getDay()>0&&db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions()).length<=0)||(db.getDataPics("valid","1").length<=0)){
+                    new AlertDialog.Builder(this)
+                            .setTitle("ಪೂರ್ಣಗೊಂಡಿದೆ")
+                            .setMessage("ನಿಮ್ಮ ತರಬೇತಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ.\n" +
+                                    "ನೀವು ಗುಣಮುಖರಾಗಿದ್ದೀರಿ ಎಂದು ಭಾವಿಸುತ್ತೇವೆ.\n" +
+                                    "ಧನ್ಯವಾದಗಳು ..")
+                            .setPositiveButton("ಸರಿ", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            })
+                            .show();
+                }
+            }
+        }else {
+            btnTraining.setText("ಬೇಸ್ಲೈನ್ ಟೆಸ್ಟ್\n");
+        }
 
         overallProgress.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -187,6 +188,8 @@ public class Home extends AppCompatActivity {
         });
 
 
+
+
     }
 
     @Override
@@ -241,46 +244,74 @@ public class Home extends AppCompatActivity {
 
 
     void sendReports() throws JSONException {
-
-
         Map<String, String> params = new HashMap<>();
-        params.put("patient_id","100");
+        params.put("patient_id","1");
         params.put("transaction",getTrans());
-        params.put("followup",getFollowUp());
-        final GetVolleyResponse response=new GetVolleyResponse(Home.this);
-        response.getResponse(SERVER_URL, params, new VolleyCallback() {
-            @Override
-            public void onSuccessResponse(String result) {
-                JSONArray jsonArray = null;
-                try {
-                    jsonArray = new JSONArray(result);
-                    JSONObject jsonObject = jsonArray.getJSONObject(0);
-                    String code = jsonObject.getString("code").toLowerCase();
-                    String message = jsonObject.getString("message");
-                    if (code.contains("success")) {
-                        Toast.makeText(getApplicationContext(), "Thank you for your feedback", Toast.LENGTH_LONG).show();
+        if(getFollowUp().length()>20&&!meta.isFollowUpSent())
+             params.put("followup",getFollowUp());
+        if(sentCount>0||(getFollowUp().length()>20&&!meta.isFollowUpSent())) {
+            final GetVolleyResponse response = new GetVolleyResponse(Home.this);
+            response.getResponse(SERVER_URL + TRANSACTION_URL, params, new VolleyCallback() {
+                @Override
+                public void onSuccessResponse(String result) {
+                    JSONArray jsonArray = null;
+                    try {
+                        jsonArray = new JSONArray(result);
+                        if(jsonArray.length()>0) {
+                            JSONObject jsonObject = jsonArray.getJSONObject(0);
+                            String code = jsonObject.getString("code").toLowerCase();
+                            if (code.contains("success")) {
+                                meta.setCountOfTransactionsSent(meta.getCountOfTransactionsSent() + sentCount);
+                                if (getFollowUp().length() > 20 && !meta.isFollowUpSent()) {
+                                    meta.setFollowUpSent(true);
+                                }
+                                meta.write();
 
-                    } else {
-                        Toast.makeText(getApplicationContext(), "sdhjaksd", Toast.LENGTH_LONG).show();
+                                new AlertDialog.Builder(Home.this)
+                                        .setTitle("ಕಳುಹಿಸಲಾಗಿದೆ")
+                                        .setMessage("ನಿಮ್ಮ ತರಬೇತಿ ವರದಿಯನ್ನು ವೈದ್ಯರಿಗೆ ಕಳುಹಿಸಲಾಗಿದೆ.\n" +
+                                                "ಧನ್ಯವಾದಗಳು ...")
+                                        .show();
+
+                            } else {
+                                new AlertDialog.Builder(Home.this)
+                                        .setTitle("ಕಳುಹಿಸಲಾಗಿದೆ")
+                                        .setMessage("ವರದಿ ಈಗಾಗಲೇ ಕಳುಹಿಸಲಾಗಿದೆ\n" +
+                                                "ಧನ್ಯವಾದಗಳು ...")
+                                        .show();
+                            }
+                        }else {
+                            new AlertDialog.Builder(Home.this)
+                                    .setTitle("ಕಳುಹಿಸಲಾಗಿದೆ")
+                                    .setMessage("ವರದಿ ಈಗಾಗಲೇ ಕಳುಹಿಸಲಾಗಿದೆ\n" +
+                                            "ಧನ್ಯವಾದಗಳು ...")
+                                    .show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
-            }
-        });
+            });
 
 
+        }else{
+            new AlertDialog.Builder(Home.this)
+                    .setTitle("ಕಳುಹಿಸಲಾಗಿದೆ")
+                    .setMessage("ವರದಿ ಈಗಾಗಲೇ ಕಳುಹಿಸಲಾಗಿದೆ\n" +
+                            "ಧನ್ಯವಾದಗಳು ...")
+                    .show();
+        }
 
-/*        new AlertDialog.Builder(Home.this)
-                .setMessage(trnsactionString)
-                .show();
-        Log.i("Jsonn",trnsactionString);*/
+          /*new AlertDialog.Builder(Home.this)
+                .setMessage(""+getFollowUp())
+                .show(); */
     }
     String getTrans() throws JSONException {
         ArrayList<ADB.Transactions> list;
         JSONArray array=new JSONArray();
         JSONObject obj=new JSONObject();
         list=db.getTransactions();
+        sentCount=list.size();
         for (int i=0;i<list.size();i++){
             ADB.Transactions t=list.get(i);
             JSONObject tempObj=new JSONObject();
@@ -310,14 +341,13 @@ public class Home extends AppCompatActivity {
         for (int i=0;i<list.size();i++){
             ADB.Record t=list.get(i);
             JSONObject tempObj=new JSONObject();
-            tempObj.put("id",t.getId());
-            tempObj.put("dayten",t.getDayten());
+            tempObj.put("pic_id",t.getId());
+            tempObj.put("value",t.getDayten());
 
             array.put(tempObj);
         }
         obj.put("followup",array);
         return obj.toString();
     }
-
 
 }

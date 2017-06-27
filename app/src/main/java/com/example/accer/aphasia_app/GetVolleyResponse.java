@@ -31,7 +31,7 @@ public class GetVolleyResponse {
     {
         this.ctx=ctx;
         progress=new ProgressDialog(this.ctx);
-        progress.setMessage("Please Wait...");
+        progress.setMessage("ದಯಮಾಡಿ ನಿರೀಕ್ಷಿಸಿ...");
         alert=new AlertDialog.Builder(this.ctx);
     }
     public void getResponse(String url, final Map params, final VolleyCallback callback)
@@ -49,17 +49,17 @@ public class GetVolleyResponse {
                 progress.dismiss();
                 String message = null;
                 if (error instanceof NetworkError) {
-                    message = "Cannot connect to Internet...Please check your connection!";
+                    message ="ಇಂಟರ್ನೆಟ್ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ ... ದಯವಿಟ್ಟು ನಿಮ್ಮ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ!";
                 } else if (error instanceof ServerError) {
-                    message = "The server could not be found. Please try again after some time!!";
+                    message = "ಸರ್ವರ್ ಕಂಡುಬಂದಿಲ್ಲ. ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ!";
                 } else if (error instanceof AuthFailureError) {
-                    message = "Cannot connect to Internet...Please check your connection!";
+                    message = "ಇಂಟರ್ನೆಟ್ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ ... ದಯವಿಟ್ಟು ನಿಮ್ಮ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ!";
                 } else if (error instanceof ParseError) {
-                    message = "Parsing error! Please try again after some time!!";
+                    message = "ಪಾರ್ಸಿಂಗ್ ದೋಷ! ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ!";
                 } else if (error instanceof NoConnectionError) {
-                    message = "Cannot connect to Internet...Please check your connection!";
+                    message = "ಇಂಟರ್ನೆಟ್ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ ... ದಯವಿಟ್ಟು ನಿಮ್ಮ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ!";
                 } else if (error instanceof TimeoutError) {
-                    message = "Connection TimeOut! Please check your internet connection.";
+                    message = "ಸಂಪರ್ಕ ಸಮಯ ಮೀರಿದೆ! ದಯವಿಟ್ಟು ನಿಮ್ಮ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ.";
                 }
                 alert.setTitle("ERROR").setMessage(message)
                         .setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -82,45 +82,6 @@ public class GetVolleyResponse {
 
 
 
-    public void getResponse(String url,  final VolleyCallback callback)
-    {
-        // progress.show();
-        StringRequest stringRequest=new StringRequest( Request.Method.GET, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                //progress.dismiss();
-                callback.onSuccessResponse(response);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // progress.dismiss();
-                String message = null;
-                if (error instanceof NetworkError) {
-                    message = "Cannot connect to Internet...Please check your connection!";
-                } else if (error instanceof ServerError) {
-                    message = "The server could not be found. Please try again after some time!!";
-                } else if (error instanceof AuthFailureError) {
-                    message = "Cannot connect to Internet...Please check your connection!";
-                } else if (error instanceof ParseError) {
-                    message = "Parsing error! Please try again after some time!!";
-                } else if (error instanceof NoConnectionError) {
-                    message = "Cannot connect to Internet...Please check your connection!";
-                } else if (error instanceof TimeoutError) {
-                    message = "Connection TimeOut! Please check your internet connection.";
-                }
-                alert.setTitle("ERROR").setMessage(message)
-                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                            @Override
-                            public void onCancel(DialogInterface dialogInterface) {
-
-                            }
-                        })
-                        .show();
-            }
-        });
-        MySingleton.getInstance(ctx).addToRequestQueue(stringRequest);
-    }
 
     public void getResponseService(String url, final Map params, final VolleyCallback callback)
     {
@@ -146,6 +107,7 @@ public class GetVolleyResponse {
                 } else if (error instanceof TimeoutError) {
                     message = "Connection TimeOut! Please check your internet connection.";
                 }
+                callback.onSuccessResponse(message);
             }
         }){
             @Override

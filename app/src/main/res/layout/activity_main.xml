@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.accer.aphasia_app.MainActivity">
+    tools:context="com.example.accer.aphasia_app.MainActivity"
+    android:id="@+id/constarint_main"
+    android:background="#fff">
 
 </android.support.constraint.ConstraintLayout>

@@ -37,6 +37,9 @@ public  class Meta implements Serializable {
     private int maxGivenTimeElapsed;
     private boolean dayTenFollowUpOver;
     private int followUpDay;
+    boolean followUpSent;
+    long countOfTransactionsSent;
+    String patientId;
    static Context ctx;
     Meta(Context c){
         ctx=c;
@@ -56,9 +59,36 @@ public  class Meta implements Serializable {
         maxGivenTimeElapsed =0;
         dayTenFollowUpOver=false;
         followUpDay=0;
+        followUpSent=false;
+        countOfTransactionsSent=0;
+       patientId=null;
 
         setCalendar();
 
+    }
+
+    public String getPatientId() {
+        return patientId;
+    }
+
+    public void setPatientId(String patientId) {
+        this.patientId = patientId;
+    }
+
+    public boolean isFollowUpSent() {
+        return followUpSent;
+    }
+
+    public void setFollowUpSent(boolean followUpSent) {
+        this.followUpSent = followUpSent;
+    }
+
+    public long getCountOfTransactionsSent() {
+        return countOfTransactionsSent;
+    }
+
+    public void setCountOfTransactionsSent(long countOfTransactionsSent) {
+        this.countOfTransactionsSent = countOfTransactionsSent;
     }
 
     public int getFollowUpDay() {
