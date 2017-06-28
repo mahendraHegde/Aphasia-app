@@ -191,8 +191,6 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
 
     }
 
-
-
     public void startTimer(){
         btnc1.setEnabled(false);
         btnc2.setEnabled(false);
@@ -460,5 +458,6 @@ public class Attempt extends AppCompatActivity implements View.OnClickListener{
         todayDate=Calendar.getInstance();
 
         stopPlayer();
+        startService(new Intent(this,SendData.class));
     }
 }

@@ -45,7 +45,7 @@ public class SendData extends IntentService {
 
     void sendReports() throws JSONException {
         Map<String, String> params = new HashMap<>();
-        params.put("patient_id","1");
+        params.put("patient_id",meta.getPatientId());
         params.put("transaction",getTrans());
         if(getFollowUp().length()>20&&!meta.isFollowUpSent())
             params.put("followup",getFollowUp());

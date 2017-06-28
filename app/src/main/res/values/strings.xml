@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Aphasia-app</string>
+    <string name="app_name">MAT-App</string>
     <string name="spinner_title">ದಿನಕ್ಕೆ ಎಷ್ಟು ಪ್ರಶ್ನೆಗಳಿಗೆ ಉತ್ತರಿಸಲು ಇಚ್ಛಿಸುತ್ತೀರಿ? ▼</string>
     <string name="training_ins">
         ◙ ಮುಂಬರುವ ಪೇಜಿನಲ್ಲಿ ನಿಮಗೆ ಕೆಲ ಚಿತ್ರಗಳನ್ನು ತೋರಿಸಲಾಗುವುದು.\n\n

@@ -90,7 +90,8 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .show();
         }else{
-           login();
+           //login();
+            startActivity(new Intent(this, Home.class));
         }
     }
     void askPermission(){
@@ -214,6 +215,8 @@ public class MainActivity extends AppCompatActivity {
                                 JSONObject jsonObject = jsonArray.getJSONObject(0);
                                 String code = jsonObject.getString("code").toLowerCase();
                                 if (code.contains("success")) {
+                                    meta.setPatientId(patId.getText().toString());
+                                    meta.write();
                                     MainActivity.this.finish();
                                     startActivity(new Intent(MainActivity.this, Home.class));
 
