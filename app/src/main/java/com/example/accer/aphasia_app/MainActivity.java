@@ -90,8 +90,7 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .show();
         }else{
-           //login();
-            startActivity(new Intent(this, Home.class));
+           login();
         }
     }
     void askPermission(){
