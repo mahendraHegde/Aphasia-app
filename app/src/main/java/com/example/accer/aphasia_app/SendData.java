@@ -51,7 +51,7 @@ public class SendData extends IntentService {
             params.put("followup",getFollowUp());
         if(sentCount>0||(getFollowUp().length()>20&&!meta.isFollowUpSent())) {
             final GetVolleyResponse response = new GetVolleyResponse(SendData.this);
-            response.getResponseService(Home.SERVER_URL +Home.TRANSACTION_URL, params, new VolleyCallback() {
+            response.getResponseService(MainActivity.SERVER_URL +Home.TRANSACTION_URL, params, new VolleyCallback() {
                 @Override
                 public void onSuccessResponse(String result) {
                     JSONArray jsonArray = null;

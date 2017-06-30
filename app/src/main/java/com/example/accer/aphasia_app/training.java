@@ -439,7 +439,17 @@ public class training extends AppCompatActivity implements View.OnClickListener{
         timer=new CountDownTimer(maxGivenTime*1000*60,1000) {
             @Override
             public void onTick(long l) {
-                timeTaken=""+((maxGivenTime*60-l/1000)/60)+":"+((maxGivenTime*60-l/1000)%60);
+                long mins=(maxGivenTime*60-l/1000)/60;
+                long secs=(maxGivenTime*60-l/1000)%60;
+                timeTaken="";;
+
+                timeTaken+=mins+":";
+                if(secs<=9)
+                    timeTaken+="0"+secs;
+                else
+                    timeTaken+=""+secs;
+
+
             }
             @Override
             public void onFinish() {

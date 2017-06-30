@@ -64,7 +64,10 @@
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:screenOrientation="landscape"></activity>
-        <activity android:name=".FollowUp"></activity>
+        <activity android:name=".FollowUp"
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="landscape"></activity>
 
         <service android:name=".SendData"
             android:exported="false"></service>

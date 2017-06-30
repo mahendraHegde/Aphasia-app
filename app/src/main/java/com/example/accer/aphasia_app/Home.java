@@ -39,7 +39,6 @@ public class Home extends AppCompatActivity {
     boolean isFollowUp=false;
     Button overallProgress;
     Button btnSendReports;
-    public static final String SERVER_URL="http://10.0.2.2:8081/Aphasia-web/";
     public static final String TRANSACTION_URL="synctransactions.php";
     int sentCount=0;
 
@@ -120,6 +119,10 @@ public class Home extends AppCompatActivity {
             btnTraining.setText("ಬೇಸ್ಲೈನ್ ಟೆಸ್ಟ್\n");
         }
 
+        if((meta.isTherapyOver()==false)&&(meta.getDay()>0&&db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions()).length<=0)||(db.getDataPics("valid","1").length<=0)){
+            meta.setTherapyOver(true);
+        }
+
         overallProgress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -151,7 +154,7 @@ public class Home extends AppCompatActivity {
                         in.putExtra("activity", "followup");
                     }else {
                         in.putExtra("activity", "training");
-                        if((meta.getDay()>0&&db.getDataPics("valid", "1",(meta.getDay()*meta.getNoOfQuestions())+","+meta.getNoOfQuestions()).length<=0)||(db.getDataPics("valid","1").length<=0)){
+                        if(meta.isTherapyOver()){
                             new AlertDialog.Builder(Home.this)
                                     .setTitle("ಪೂರ್ಣಗೊಂಡಿದೆ")
                                     .setMessage("ನಿಮ್ಮ ತರಬೇತಿ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ.\n" +
@@ -224,7 +227,7 @@ public class Home extends AppCompatActivity {
        ArrayAdapter<String> adapter=new ArrayAdapter<String>(this,android.R.layout.select_dialog_item,list);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         new AlertDialog.Builder(Home.this)
-                .setTitle("please select follow up test day for your study(Doctors Only)")
+                .setTitle("please select follow up test day for your study(Speech Therapist Only)")
                 .setCancelable(false)
                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
@@ -245,19 +248,21 @@ public class Home extends AppCompatActivity {
 
     void sendReports() throws JSONException {
         Map<String, String> params = new HashMap<>();
+        if(meta.isTherapyOver())
+            params.put("over","1");
         params.put("patient_id",meta.getPatientId());
         params.put("transaction",getTrans());
         if(getFollowUp().length()>20&&!meta.isFollowUpSent())
              params.put("followup",getFollowUp());
         if(sentCount>0||(getFollowUp().length()>20&&!meta.isFollowUpSent())) {
             final GetVolleyResponse response = new GetVolleyResponse(Home.this);
-            response.getResponse(SERVER_URL + TRANSACTION_URL, params, new VolleyCallback() {
+            response.getResponse(MainActivity.SERVER_URL + TRANSACTION_URL, params, new VolleyCallback() {
                 @Override
                 public void onSuccessResponse(String result) {
                     JSONArray jsonArray = null;
                     try {
                         jsonArray = new JSONArray(result);
-                        if(jsonArray.length()>0) {
+                        if(jsonArray!=null&&jsonArray.length()>0) {
                             JSONObject jsonObject = jsonArray.getJSONObject(0);
                             String code = jsonObject.getString("code").toLowerCase();
                             if (code.contains("success")) {

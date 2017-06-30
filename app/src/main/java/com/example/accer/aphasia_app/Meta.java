@@ -40,6 +40,7 @@ public  class Meta implements Serializable {
     boolean followUpSent;
     long countOfTransactionsSent;
     String patientId;
+    private boolean therapyOver;
    static Context ctx;
     Meta(Context c){
         ctx=c;
@@ -62,9 +63,18 @@ public  class Meta implements Serializable {
         followUpSent=false;
         countOfTransactionsSent=0;
        patientId=null;
+        therapyOver=false;
 
         setCalendar();
 
+    }
+
+    public boolean isTherapyOver() {
+        return therapyOver;
+    }
+
+    public void setTherapyOver(boolean therapyOver) {
+        this.therapyOver = therapyOver;
     }
 
     public String getPatientId() {

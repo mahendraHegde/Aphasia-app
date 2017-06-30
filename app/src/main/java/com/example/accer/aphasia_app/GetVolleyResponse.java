@@ -107,7 +107,6 @@ public class GetVolleyResponse {
                 } else if (error instanceof TimeoutError) {
                     message = "Connection TimeOut! Please check your internet connection.";
                 }
-                callback.onSuccessResponse(message);
             }
         }){
             @Override
