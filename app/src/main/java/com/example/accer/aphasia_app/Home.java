@@ -329,6 +329,7 @@ public class Home extends AppCompatActivity {
             tempObj.put("cue4",t.getCue4());
             tempObj.put("time",t.getTime());
             tempObj.put("day",t.getDay());
+            tempObj.put("date",t.getDate());
 
 
             array.put(tempObj);

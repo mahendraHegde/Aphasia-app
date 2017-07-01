@@ -54,6 +54,7 @@ public class ADB extends SQLiteOpenHelper {
                 "cue4 INTGER DEFAULT 0," +
                 "time TEXT," +
                 "day Integer DEFAULT 0," +
+                "dt DATETIME DEFAULT CURRENT_DATE," +
                 "PRIMARY KEY (type,attempt_id,pic_id)"+
                 ")";
        // db.execSQL("PRAGMA foreign_keys=ON");
@@ -244,11 +245,11 @@ public class ADB extends SQLiteOpenHelper {
         String limit=sentCount+","+(cnt-sentCount);
         try {
 
-            Cursor c=db.query(TABLE_TRANSACTIONS,new String[]{"type","attempt_id","pic_id","cue1","cue2","cue3","cue4","time","day"},null,null,null,null,null,limit);
+            Cursor c=db.query(TABLE_TRANSACTIONS,new String[]{"type","attempt_id","pic_id","cue1","cue2","cue3","cue4","time","day","dt"},null,null,null,null,null,limit);
             if(c.moveToFirst()){
 
                 do{
-                    list.add(new Transactions(c.getInt(0),c.getInt(1),c.getInt(2),c.getInt(3),c.getInt(4),c.getInt(5),c.getInt(6),c.getString(7),c.getInt(8)));
+                    list.add(new Transactions(c.getInt(0),c.getInt(1),c.getInt(2),c.getInt(3),c.getInt(4),c.getInt(5),c.getInt(6),c.getString(7),c.getInt(8),c.getString(9)));
                 }while (c.moveToNext());
 
             }else
@@ -370,8 +371,8 @@ public class ADB extends SQLiteOpenHelper {
 
     class Transactions{
         private int type,attempt_id,pic_id,cue1,cue2,cue3,cue4,day;
-        private String time;
-        Transactions(int type,int attempt_id,int pic_id,int cue1,int cue2,int cue3,int cue4,String time,int day){
+        private String time,date;
+        Transactions(int type,int attempt_id,int pic_id,int cue1,int cue2,int cue3,int cue4,String time,int day,String date){
             this.type=type;
             this.attempt_id=attempt_id;
             this.pic_id=pic_id;
@@ -381,6 +382,15 @@ public class ADB extends SQLiteOpenHelper {
             this.cue4=cue4;
             this.time=time;
             this.day=day;
+            this.date=date;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public void setDate(String date) {
+            this.date = date;
         }
 
         public int getDay() {
