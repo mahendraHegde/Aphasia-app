@@ -33,7 +33,7 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity {
 
     ADB db=null;
-    final static  int totalNoOfPics=24;
+    final static  int totalNoOfPics=100;
     Meta meta;
     Calendar c;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         }else{
            login();
-            //startActivity(new Intent(this, Home.class));
+           // startActivity(new Intent(this, Home.class));
         }
     }
     void askPermission(){

@@ -36,7 +36,7 @@ public class FollowUp extends AppCompatActivity implements View.OnClickListener 
     PowerManager.WakeLock wl;
     Button timer;
     final int interval=21;
-    int position=0,threashold=24;
+    int position=0,threashold=100;
     ADB db;
     CountDownTimer countDownTimer;
     MediaPlayer player;

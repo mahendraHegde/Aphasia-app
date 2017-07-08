@@ -36,7 +36,7 @@ public class BaselineTest extends AppCompatActivity implements View.OnClickListe
     PowerManager.WakeLock wl;
      Button timer;
     final int interval=21;
-    int position=0,threashold=24;
+    int position=0,threashold=100;
     ADB db;
     CountDownTimer countDownTimer;
     MediaPlayer player;

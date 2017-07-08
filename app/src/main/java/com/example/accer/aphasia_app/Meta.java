@@ -297,7 +297,7 @@ public  class Meta implements Serializable {
             for (int i = 0; i < children.length; i++)
             {
                 if(new File(dir, children[i]).delete())
-                    Toast.makeText(ctx,"deltd",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ctx,"welcome",Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -319,7 +319,6 @@ public  class Meta implements Serializable {
                     dst.transferFrom(src, 0, src.size());
                     src.close();
                     dst.close();
-                    Toast.makeText(ctx, "Backup is successful to SD card", Toast.LENGTH_SHORT).show();
                 }
             }
         } catch (Exception e) {
@@ -343,7 +342,7 @@ public  class Meta implements Serializable {
                     dst.transferFrom(src, 0, src.size());
                     src.close();
                     dst.close();
-                    Toast.makeText(ctx, "Database Restored successfully", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(ctx, "Database Restored successfully", Toast.LENGTH_SHORT).show();
                 }
             }
         } catch (Exception e) {
